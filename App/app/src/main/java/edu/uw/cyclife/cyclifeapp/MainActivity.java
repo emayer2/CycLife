@@ -1,15 +1,19 @@
 package edu.uw.cyclife.cyclifeapp;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -18,35 +22,45 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.content.pm.PackageManager;
 
+import java.util.HashSet;
 import java.util.Set;
+
+import static java.security.AccessController.getContext;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final int REQUEST_ENABLE_BT = 1;  // For notify intent
     private BluetoothAdapter bluetoothAdapter;
-    private ArrayAdapter<String> BTArrayAdapter;
     private Set<BluetoothDevice> pairedDevices;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            ((TextView) findViewById(R.id.main_text))
-                    .setText("FOUND");
+
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Discovery has found an object
                 BluetoothDevice foundDevice =
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String deviceName = foundDevice.getName();
-                String deviceHWAddr = foundDevice.getAddress();
-//                CharSequence currText = ((TextView) findViewById(R.id.main_text)).getText();
+                if (!pairedDevices.contains(foundDevice)) {
+                    pairedDevices.add(foundDevice);
+                    String deviceName = foundDevice.getName();
+                    String deviceHWAddr = foundDevice.getAddress();
+                    CharSequence currText = ((TextView) findViewById(R.id.main_text)).getText();
+                    ((TextView) findViewById(R.id.main_text))
+                            .setText(currText.toString() + "\nDevice: " + deviceName +
+                                    ", Addr: " + deviceHWAddr);
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                 ((TextView) findViewById(R.id.main_text))
-                        .setText("Device: " + deviceName +
-                                  ", Addr: " + deviceHWAddr + "\n");
+                        .setText("Discovering...");
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                ((TextView) findViewById(R.id.main_text))
+                        .setText("Done Searching!");
             }
         }
     };
@@ -75,6 +89,23 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Bluetooth discovery
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(mReceiver, filter);
+
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.CALL_PHONE}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.CALL_PRIVILEGED}, 1);
+
 
 //        // Enable bluetooth discovery
 //        Intent discoverableIntent =
@@ -132,36 +163,53 @@ public class MainActivity extends AppCompatActivity
             // Handle the camera action
             Intent intent = new Intent(this, ScrollingActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_bluetooth) {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter == null) {
                 // Device does not support Bluetooth
                 ((TextView)findViewById(R.id.main_text)).setText("No Bluetooth");
             } else {
-                // Bluetooth found, check if enabled and prompt
-                if (!bluetoothAdapter.isEnabled()) {
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                }
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                    // Bluetooth found, check if enabled and prompt
+                    if (!bluetoothAdapter.isEnabled()) {
+                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                    }
 
-                // Start discovery
-                ((TextView) findViewById(R.id.main_text)).setText("Discovering...");
-                bluetoothAdapter.startDiscovery();
-                // Bluetooth discovery
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-                filter.addAction(BluetoothDevice.ACTION_FOUND);
-                registerReceiver(mReceiver, filter);
-//                ((TextView) findViewById(R.id.main_text)).setText("Done!");
-//                String out = "";
-//                for (BluetoothDevice d : bluetoothAdapter.getBondedDevices()) {
-//                    out += ("Device: " + d.getName() + ", Addr: " + d.getAddress() + "\n");
-//                }
-//                ((TextView) findViewById(R.id.main_text)) .setText(out);
+                    // Start discovery, first ask for location permissions
+                    // (for hosts of android OS >= 6.0)
+                    if (bluetoothAdapter.isDiscovering()) {
+                        bluetoothAdapter.cancelDiscovery();
+                    }
+                    pairedDevices = new HashSet<>();
+                    bluetoothAdapter.startDiscovery();
+                } else {
+                    ((TextView) findViewById(R.id.main_text))
+                            .setText("Location Permission Not Enabled!");
+                }
             }
 
-        } else if (id == R.id.nav_share) {
-
+        } else if (id == R.id.nav_call) {
+            Intent callIntent = new Intent(Intent.ACTION_CALL);
+            callIntent.setData(Uri.parse("tel:2537400119"));
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CALL_PHONE}, 1);
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CALL_PRIVILEGED}, 1);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                startActivity(callIntent);
+            } else {
+                ((TextView) findViewById(R.id.main_text))
+                        .setText("Phone Permission Not Enabled!");
+            }
         } else if (id == R.id.nav_send) {
 
         }
