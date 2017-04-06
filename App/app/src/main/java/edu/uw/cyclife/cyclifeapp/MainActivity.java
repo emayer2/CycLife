@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
+import android.media.audiofx.BassBoost;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -167,9 +168,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
-            Intent intent = new Intent(this, ScrollingActivity.class);
-            startActivity(intent);
+            // Do nothing since we're in the home already
         } else if (id == R.id.nav_bluetooth) {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter == null) {
@@ -220,8 +219,9 @@ public class MainActivity extends AppCompatActivity
                 ((TextView) findViewById(R.id.main_text))
                         .setText("Phone Permission Not Enabled!");
             }
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_settings) {
+            Intent settIntent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(settIntent, 1);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
