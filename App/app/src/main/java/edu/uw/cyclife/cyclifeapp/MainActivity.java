@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +23,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.content.pm.PackageManager;
 
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_ENABLE_BT = 1;  // For notify intent
     private BluetoothAdapter bluetoothAdapter;
     private Set<BluetoothDevice> pairedDevices;
+    private ArrayAdapter<String> deviceList;
+    private ListView deviceListView;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -51,9 +56,9 @@ public class MainActivity extends AppCompatActivity
                     String deviceName = foundDevice.getName();
                     String deviceHWAddr = foundDevice.getAddress();
                     CharSequence currText = ((TextView) findViewById(R.id.main_text)).getText();
-                    ((TextView) findViewById(R.id.main_text))
-                            .setText(currText.toString() + "\nDevice: " + deviceName +
+                    deviceList.add(currText.toString() + "\nDevice: " + deviceName +
                                     ", Addr: " + deviceHWAddr);
+                    deviceList.notifyDataSetChanged();
                 }
             } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                 ((TextView) findViewById(R.id.main_text))
@@ -90,6 +95,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        deviceListView = (ListView) findViewById(R.id.bt_list);
+        deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        deviceListView.setAdapter(deviceList);
+
         // Bluetooth discovery
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
@@ -103,8 +112,6 @@ public class MainActivity extends AppCompatActivity
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.CALL_PRIVILEGED}, 1);
 
 
 //        // Enable bluetooth discovery
@@ -167,7 +174,7 @@ public class MainActivity extends AppCompatActivity
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter == null) {
                 // Device does not support Bluetooth
-                ((TextView)findViewById(R.id.main_text)).setText("No Bluetooth");
+                ((TextView)findViewById(R.id.main_text)).setText("No Bluetooth Support :(");
             } else {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED &&
@@ -178,14 +185,25 @@ public class MainActivity extends AppCompatActivity
                         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                     }
-
-                    // Start discovery, first ask for location permissions
-                    // (for hosts of android OS >= 6.0)
-                    if (bluetoothAdapter.isDiscovering()) {
-                        bluetoothAdapter.cancelDiscovery();
+                    // Check if location enabled, and prompt
+                    if (!bluetoothAdapter.isEnabled()) {
+                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                     }
-                    pairedDevices = new HashSet<>();
-                    bluetoothAdapter.startDiscovery();
+                    if (!((LocationManager) getSystemService(Context.LOCATION_SERVICE))
+                            .isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        ((TextView)findViewById(R.id.main_text)).setText("Location Not Turned On :(");
+                    } else {
+
+                        // Start discovery, first ask for location permissions
+                        // (for hosts of android OS >= 6.0)
+                        if (bluetoothAdapter.isDiscovering()) {
+                            bluetoothAdapter.cancelDiscovery();
+                        }
+                        deviceList.clear();
+                        pairedDevices = new HashSet<>();
+                        bluetoothAdapter.startDiscovery();
+                    }
                 } else {
                     ((TextView) findViewById(R.id.main_text))
                             .setText("Location Permission Not Enabled!");
@@ -193,18 +211,10 @@ public class MainActivity extends AppCompatActivity
             }
 
         } else if (id == R.id.nav_call) {
-            Intent callIntent = new Intent(Intent.ACTION_CALL);
-            callIntent.setData(Uri.parse("tel:2537400119"));
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CALL_PHONE}, 1);
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CALL_PRIVILEGED}, 1);
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                     == PackageManager.PERMISSION_GRANTED) {
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                callIntent.setData(Uri.parse("tel:1234567890"));
                 startActivity(callIntent);
             } else {
                 ((TextView) findViewById(R.id.main_text))
