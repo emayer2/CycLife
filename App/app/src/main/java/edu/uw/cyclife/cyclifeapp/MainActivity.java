@@ -7,8 +7,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
-import android.media.audiofx.BassBoost;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -25,15 +26,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.content.pm.PackageManager;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static java.security.AccessController.getContext;
-
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -42,6 +40,10 @@ public class MainActivity extends AppCompatActivity
     private Set<BluetoothDevice> pairedDevices;
     private ArrayAdapter<String> deviceList;
     private ListView deviceListView;
+    private boolean isMainButtonRed = true;
+
+    // UUID For Bluetooth
+    private final String BT_UUID =  "00001101-0000-1000-8000-00805F9B34FB";
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -95,6 +97,25 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        final Button button = (Button) findViewById(R.id.main_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (isMainButtonRed) {
+                    // Switch to green
+                    findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_green);
+                    ((TextView) findViewById(R.id.main_text))
+                            .setText("Deactivate");
+                } else {
+                    findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
+                    ((TextView) findViewById(R.id.main_text))
+                            .setText("Activate");
+                }
+                isMainButtonRed = !isMainButtonRed;
+
+                // TODO: Start bluetooth, start connection, run
+            }
+        });
 
         deviceListView = (ListView) findViewById(R.id.bt_list);
         deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
