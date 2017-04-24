@@ -65,6 +65,8 @@ package edu.uw.cyclife.cyclifeapp;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.concurrent.TimeUnit;
@@ -86,7 +88,12 @@ public class KillswitchActivity extends Activity {
 
         text1=(TextView)findViewById(R.id.timer_countdown);
 
-
+        final Button killbutton = (Button)findViewById(R.id.kill_button);
+        killbutton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // TODO: Kill timer, go back to home screen
+            }
+        });
 
         new CountDownTimer(16069000, 1000) { // adjust the milli seconds here
 

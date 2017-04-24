@@ -13,20 +13,38 @@
         android:background="@drawable/power_button_red"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Start"
-        android:onClick="Start"
+        android:layout_marginTop="20px"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"/>
     <TextView
         android:id="@+id/main_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Activate"
-        android:textSize="20pt"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Activate" android:textSize="17pt"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/main_button"/>
+    <ImageView
+        android:background="@drawable/ic_menu_battery"
+        android:id="@+id/main_battery"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/main_text"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+    <View
+        android:id="@+id/main_battery_level"
+        android:layout_width="215px"
+        android:layout_height="430px"
+        android:layout_marginBottom="75px"
+        app:layout_constraintBottom_toBottomOf="@id/main_battery"
+        app:layout_constraintLeft_toLeftOf="@id/main_battery"
+        app:layout_constraintRight_toRightOf="@id/main_battery"/>
+        android:id="@+id/bt_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <ListView
         android:id="@+id/bt_list"
         android:layout_width="wrap_content"

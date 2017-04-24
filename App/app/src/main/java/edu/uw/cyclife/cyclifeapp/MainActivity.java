@@ -8,9 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -41,8 +43,31 @@ public class MainActivity extends AppCompatActivity
     private ListView deviceListView;
     private boolean isMainButtonRed = true;
 
+    private final int MAX_BAT_HEIGHT = 430;
+    private int currHeight = 30;
+
     // UUID For Bluetooth
     private final String BT_UUID =  "00001101-0000-1000-8000-00805F9B34FB";
+
+    //    class BlinkThread extends Thread {
+//        boolean isOrange = false;
+//        public void run() {
+//            while (true) {
+//                if (isOrange) {
+//                    findViewById(R.id.ALARM_ID_HERE).setBackgroundResource(R.drawable.power_button_orange);
+//                } else {
+//                    findViewById(R.id.ALARM_ID_HERE).setBackgroundResource(R.drawable.power_button_black);
+//                }
+//                isOrange = !isOrange;
+//                try {
+//                    Thread.sleep(750);
+//                } catch (InterruptedException e) {
+//                    // Should never happen???
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -83,8 +108,10 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                currHeight = Math.min(currHeight + 5, MAX_BAT_HEIGHT);
+                setBatteryHeight(currHeight);
             }
         });
 
@@ -120,6 +147,9 @@ public class MainActivity extends AppCompatActivity
         deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         deviceListView.setAdapter(deviceList);
 
+        // Setup battery
+        setBatteryHeight(currHeight);
+
         // Bluetooth discovery
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
@@ -140,6 +170,31 @@ public class MainActivity extends AppCompatActivity
 //                new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 //        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
 //        startActivity(discoverableIntent);
+    }
+
+    private void setBatteryHeight(int h) {
+        int colg;
+        int colr;
+        if (h >= MAX_BAT_HEIGHT / 2) {
+            colg = 0xf;
+            colr = 15 - (int)(15 * ((double)(h - MAX_BAT_HEIGHT/2)) / (MAX_BAT_HEIGHT/2));
+        } else {
+            colr = 0xf;
+            colg = (int)(15 * ((double)h)) / (MAX_BAT_HEIGHT/2);
+        }
+        String color = "#ff";
+        String colrstr = Integer.toHexString(colr);
+        String colgstr = Integer.toHexString(colg);
+        color += colrstr.charAt(colrstr.length() - 1);
+        color += colrstr.charAt(colrstr.length() - 1);
+        color += colgstr.charAt(colgstr.length() - 1);
+        color += colgstr.charAt(colgstr.length() - 1);
+        color += "00";
+        View v = findViewById(R.id.main_battery_level);
+        v.setBackgroundColor(Color.parseColor(color));
+        ConstraintLayout.LayoutParams p = (ConstraintLayout.LayoutParams)v.getLayoutParams();
+        p.height = h;
+        v.setLayoutParams(p);
     }
 
     @Override
