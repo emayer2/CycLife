@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -174,6 +173,11 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (id == R.id.on_settings) {
+            Intent settIntent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(settIntent, 1);
+        }
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
@@ -243,6 +247,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_settings) {
             Intent settIntent = new Intent(this, SettingsActivity.class);
             startActivityForResult(settIntent, 1);
+        } else if (id == R.id.nav_killswitch) {
+            // TODO: Remove this testing
+            Intent si = new Intent(this, KillswitchActivity.class);
+            startActivity(si);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

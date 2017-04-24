@@ -10,6 +10,10 @@
             android:id="@+id/nav_bluetooth"
             android:icon="@drawable/ic_menu_bluetooth"
             android:title="Bluetooth" />
+        <item
+            android:id="@+id/nav_killswitch"
+            android:icon="@drawable/ic_menu_home"
+            android:title="Kill Switch" />
     </group>
 
     <item android:title="Communicate">

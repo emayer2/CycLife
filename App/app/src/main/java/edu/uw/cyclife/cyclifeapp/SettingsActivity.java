@@ -212,6 +212,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 startActivity(new Intent(getActivity(), SettingsActivity.class));
                 return true;
             }
+
+            // TODO: Prompt contacts list on click
+            // Contacts List
+
             return super.onOptionsItemSelected(item);
         }
     }

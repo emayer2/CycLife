@@ -30,4 +30,26 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_title_add_friends_to_messages" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="911Enabled"
+        android:title="EMS Enabled (Calls 911)" />
+    <EditTextPreference
+        android:defaultValue="60"
+        android:key="KillSwitchLength"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Kill Switch Timer Length (Sec)" />
+    <EditTextPreference
+        android:defaultValue="Cyclists has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:"
+        android:key="EmergencyMessage"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Edit Emergency Message" />
+    <EditTextPreference
+        android:defaultValue="Default value"
+        android:key="edit_text_preference_2"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Device Discovery" />
 </PreferenceScreen>
