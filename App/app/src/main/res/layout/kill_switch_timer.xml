@@ -5,14 +5,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="edu.uw.cyclife.cyclifeapp.MainActivity"
+    tools:context="edu.uw.cyclife.cyclifeapp.KillswitchActivity"
     tools:showIn="@layout/app_bar_main">
 
+    <TextView
+        android:id="@+id/info_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="LARGE TEXT"
+        android:textSize="14pt"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <Button
         android:id="@+id/kill_button"
-        android:background="@drawable/power_button_red"
+        android:background="@drawable/power_button_orange"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/info_message"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
     <TextView
@@ -20,11 +32,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="LARGE TEXT"
+        android:gravity="center"
         android:textSize="20pt"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/kill_button" />
     <ListView
         android:id="@+id/bt_list"
         android:layout_width="wrap_content"
