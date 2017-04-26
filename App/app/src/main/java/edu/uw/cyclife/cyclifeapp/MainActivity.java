@@ -26,6 +26,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -146,6 +147,18 @@ public class MainActivity extends AppCompatActivity
         deviceListView = (ListView) findViewById(R.id.bt_list);
         deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         deviceListView.setAdapter(deviceList);
+        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
+            {
+                String addr = (String)deviceListView.getItemAtPosition(position);
+                addr = addr.split(", ")[1];
+                ((TextView)findViewById(R.id.main_text)).setText(addr);
+//                BTThread sock = new BTThread(bluetoothAdapter, addr);
+//                sock.start();
+            }
+        });
 
         // Setup battery
         setBatteryHeight(currHeight);
@@ -163,6 +176,12 @@ public class MainActivity extends AppCompatActivity
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+
+        deviceList.add("1, 123456");
+        deviceList.add("2, 142536");
+        deviceList.add("3, 165432");
+        deviceList.add("4, 198656");
+        deviceList.notifyDataSetChanged();
 
 
 //        // Enable bluetooth discovery
