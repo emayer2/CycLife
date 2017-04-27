@@ -203,6 +203,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("example_text"));
             bindPreferenceSummaryToValue(findPreference("example_list"));
+            bindPreferenceSummaryToValue(findPreference("KillSwitchLength"));
+            bindPreferenceSummaryToValue(findPreference("EmergencyMessage"));
         }
 
         @Override
@@ -280,3 +282,23 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
     }
 }
+
+/*
+// TODO: Contacts list picking
+
+Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+startActivityForResult(intent, 1);
+
+String phoneNo = null;
+Uri uri = data.getData();
+Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+
+if (cursor.moveToFirst()) {
+    int phoneIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+    phoneNo = cursor.getString(phoneIndex);
+}
+
+curosr.close();
+
+
+ */

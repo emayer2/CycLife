@@ -5,12 +5,15 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.media.audiofx.BassBoost;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
@@ -43,6 +46,9 @@ public class KillswitchActivity extends AppCompatActivity {
     // Sleep for 1000 milliseconds
     long[] pattern = {0, 100, 1000};
 
+    SharedPreferences sharedPref = null;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -51,12 +57,27 @@ public class KillswitchActivity extends AppCompatActivity {
 
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS},1);
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String killSwitchLength = sharedPref.getString("KillSwitchLength", "");
+        int ksLength;
+        boolean emsEnabled;
+        if (killSwitchLength.equals("")) {
+            ksLength = 60;
+        } else {
+            ksLength = Integer.parseInt(killSwitchLength);
+        }
+        String emergencyMessage = sharedPref.getString("EmergencyMessage", "");
+
         text1=(TextView)findViewById(R.id.timer_countdown);
         infoText=(TextView)findViewById(R.id.info_message);
         infoText.setText("Press the killswitch to disable the emergency message!");
 
+        emsEnabled = sharedPref.getBoolean("911Enabled", false);
+        final String emsMessage = sharedPref.getString("EmergencyMessage", "Cyclists has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:");
+
         outOfTime = false;
         final Button killbutton = (Button)findViewById(R.id.kill_button);
+
 
         // Code to blink the kill switch on and off drawing attention until the user pushes it
         final Animation animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
@@ -79,7 +100,7 @@ public class KillswitchActivity extends AppCompatActivity {
         // Vibrate for 500 milliseconds
         vib.vibrate(pattern, 0);
 
-        final CountDownTimer ks = new CountDownTimer(10000, 1000) { // adjust the milli seconds here
+        final CountDownTimer ks = new CountDownTimer(ksLength * 1000, 1000) { // adjust the milli seconds here
 
             public void onTick(long millisUntilFinished) {
 
@@ -92,10 +113,10 @@ public class KillswitchActivity extends AppCompatActivity {
 
             public void onFinish() {
                 // TODO: Send messages to a list of contacts, currently only does one
-                // TODO: Use the user's setting for the emergency message
+
                 try {
                     SmsManager smsManager = SmsManager.getDefault();
-                    ArrayList<String> msgArray = smsManager.divideMessage("test");
+                    ArrayList<String> msgArray = smsManager.divideMessage(emsMessage);
                     smsManager.sendMultipartTextMessage("1234567890", null,msgArray, null, null);
                     Toast.makeText(getApplicationContext(), "Message Sent",Toast.LENGTH_LONG).show();
                 } catch (Exception ex) {
