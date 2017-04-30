@@ -30,6 +30,10 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_title_add_friends_to_messages" />
+    <Preference  android:key="key" android:title="See Android Market">
+        <intent android:targetPackage="edu.uw.cyclife.cyclifeapp"
+                android:targetClass="edu.uw.cyclife.cyclifeapp.ContactsActivity" />
+    </Preference>
     <SwitchPreference
         android:defaultValue="false"
         android:key="911Enabled"
