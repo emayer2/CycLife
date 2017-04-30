@@ -1,10 +1,12 @@
 package edu.uw.cyclife.cyclifeapp;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +21,7 @@ import java.util.ArrayList;
  * Created by Keegan Griffee on 4/30/2017.
  */
 
-public class ContactsActivity extends ListActivity{
+public class ContactsActivity extends AppCompatActivity {
     ArrayList<String> name1 = new ArrayList<String>();
     ArrayList<String> phno1 = new ArrayList<String>();
     protected static final String TAG = null;
@@ -32,74 +34,46 @@ public class ContactsActivity extends ListActivity{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.contacts_list_view);
+
+        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+        pickContactIntent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+        startActivityForResult(pickContactIntent, 1);
 
 
-        final Button done_Button = (Button) findViewById(R.id.kill_button);
-        final Button clear_Button =(Button) findViewById(R.id.kill_button);
-        Cursor mCursor = getContacts();
 
-        startManagingCursor(mCursor);
-        ListAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_multiple_choice, mCursor,
-                Contacts = new String[] {ContactsContract.Contacts.DISPLAY_NAME },
-                to = new int[] { android.R.id.text1 });
-
-        setListAdapter(adapter);
-        myListView = getListView();
-        myListView.setItemsCanFocus(false);
-        myListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        clear_Button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Selection Cleared", Toast.LENGTH_SHORT).show();
-                ClearSelections();
-            }
-        });
-
-        /** When 'Done' Button Pushed: **/
-
-        done_Button.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick (View v){
-                String name = null;
-                String number = null;
-                long [] ids = myListView.getCheckedItemIds();
-                for(long id : ids) {
-                    Cursor contact = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[] { id + "" }, null);
-                    while(contact.moveToNext()){
-                        name = contact.getString(contact.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                        //name+=name;
-                        number = contact.getString(contact.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        //number+=number;
-                    }
-                    Toast.makeText(getApplicationContext(), "Name: " +name + "\n" + "Number: " + number , Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//        intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+//        startActivityForResult(intent, 1);
     }
 
-    private void ClearSelections() {
-        int count = this.myListView.getAdapter().getCount();
-        for (int i = 0; i < count; i++) {
-            this.myListView.setItemChecked(i, false);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request it is that we're responding to
+        if (requestCode == 1) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // Get the URI that points to the selected contact
+                Uri contactUri = data.getData();
+                // We only need the NUMBER column, because there will be only one row in the result
+                String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER};
+
+                // Perform the query on the contact to get the NUMBER column
+                // We don't need a selection or sort order (there's only one result for the given URI)
+                // CAUTION: The query() method should be called from a separate thread to avoid blocking
+                // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+                // Consider using CursorLoader to perform the query.
+                Cursor cursor = getContentResolver()
+                        .query(contactUri, projection, null, null, null);
+                cursor.moveToFirst();
+
+                // Retrieve the phone number from the NUMBER column
+                int column = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String number = cursor.getString(column);
+
+                // Do something with the phone number...
+                phno1.add(number);
+            }
         }
-    }
-
-    @SuppressWarnings("deprecation")
-    private Cursor getContacts() {
-        // Run query
-        Uri uri = ContactsContract.Contacts.CONTENT_URI;
-        String[] projection = new String[] { ContactsContract.Contacts._ID,
-                ContactsContract.Contacts.DISPLAY_NAME};
-        String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + " = '"
-                + ("1") + "'";
-        String[] selectionArgs = null;
-        String sortOrder = ContactsContract.Contacts.DISPLAY_NAME
-                + " COLLATE LOCALIZED ASC";
-
-        return managedQuery(uri, projection, selection, selectionArgs,
-                sortOrder);
-
     }
 
     @Override

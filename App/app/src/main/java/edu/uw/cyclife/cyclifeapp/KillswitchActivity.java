@@ -25,7 +25,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static android.R.id.message;
@@ -37,6 +39,7 @@ public class KillswitchActivity extends AppCompatActivity {
     boolean outOfTime;
     Ringtone r;
     Vibrator vib;
+    private List<String> contactNumbers;
 
     private static final String FORMAT = "%02d:%02d";
 
@@ -60,20 +63,22 @@ public class KillswitchActivity extends AppCompatActivity {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String killSwitchLength = sharedPref.getString("KillSwitchLength", "");
         int ksLength;
-        boolean emsEnabled;
+        final boolean emsEnabled;
         if (killSwitchLength.equals("")) {
             ksLength = 60;
         } else {
             ksLength = Integer.parseInt(killSwitchLength);
         }
         String emergencyMessage = sharedPref.getString("EmergencyMessage", "");
+        contactNumbers = getEmergencyNumbers();
 
         text1=(TextView)findViewById(R.id.timer_countdown);
         infoText=(TextView)findViewById(R.id.info_message);
         infoText.setText("Press the killswitch to disable the emergency message!");
 
         emsEnabled = sharedPref.getBoolean("911Enabled", false);
-        final String emsMessage = sharedPref.getString("EmergencyMessage", "Cyclists has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:");
+        final String emsMessage = sharedPref.getString("UserName", "") + " " +
+                sharedPref.getString("EmergencyMessage", "Cyclist has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:");
 
         outOfTime = false;
         final Button killbutton = (Button)findViewById(R.id.kill_button);
@@ -113,15 +118,32 @@ public class KillswitchActivity extends AppCompatActivity {
 
             public void onFinish() {
                 // TODO: Send messages to a list of contacts, currently only does one
+                for (int i = 0; i < contactNumbers.size(); i++) {
+                    try {
+                        SmsManager smsManager = SmsManager.getDefault();
+                        ArrayList<String> msgArray = smsManager.divideMessage(emsMessage);
+                        // Send a message to each of the emergency contacts
+                        smsManager.sendMultipartTextMessage(contactNumbers.get(i), null, msgArray, null, null);
 
-                try {
-                    SmsManager smsManager = SmsManager.getDefault();
-                    ArrayList<String> msgArray = smsManager.divideMessage(emsMessage);
-                    smsManager.sendMultipartTextMessage("1234567890", null,msgArray, null, null);
-                    Toast.makeText(getApplicationContext(), "Message Sent",Toast.LENGTH_LONG).show();
-                } catch (Exception ex) {
-                    Toast.makeText(getApplicationContext(), ex.getMessage().toString(), Toast.LENGTH_LONG).show();
-                    ex.printStackTrace();
+                        Toast.makeText(getApplicationContext(), "Message Sent", Toast.LENGTH_LONG).show();
+                    } catch (Exception ex) {
+                        Toast.makeText(getApplicationContext(), ex.getMessage().toString(), Toast.LENGTH_LONG).show();
+                        ex.printStackTrace();
+                    }
+                }
+                // Send a message to 911 if EMS is enabled
+                if (emsEnabled) {
+                    try {
+                        SmsManager smsManager = SmsManager.getDefault();
+                        ArrayList<String> msgArray = smsManager.divideMessage(emsMessage);
+                        // Send a message to 911
+                        // TODO: Replace with 911
+                        smsManager.sendMultipartTextMessage("9999999999", null, msgArray, null, null);
+                        Toast.makeText(getApplicationContext(), "Message Sent", Toast.LENGTH_LONG).show();
+                    } catch (Exception ex) {
+                        Toast.makeText(getApplicationContext(), ex.getMessage().toString(), Toast.LENGTH_LONG).show();
+                        ex.printStackTrace();
+                    }
                 }
                 findViewById(R.id.kill_button).setBackgroundResource(R.drawable.power_button_black);
                 text1.setText("Emergency Message Sent");
@@ -141,5 +163,17 @@ public class KillswitchActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public List<String> getEmergencyNumbers() {
+        List<String> contactNumbers = new ArrayList<String>();
+        for (int i = 0; i < 5; i++) {
+            String contact = sharedPref.getString("contact" + i, "");
+            if (!contact.equals("") || !contact.equals(" ") || !contact.equals("5552368")) {
+                contactNumbers.add(contact);
+            }
+        }
+
+        return contactNumbers;
     }
 }
