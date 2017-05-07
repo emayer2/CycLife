@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.UUID;
 
 
 public class BTThread extends Thread {
-    private final int NUM_BYTES = 9;
+    private final int NUM_BYTES = 900;
     private final String TAG = getClass().getSimpleName();
     private final UUID BT_UUID =  UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private BluetoothSocket socket = null;
@@ -21,7 +22,11 @@ public class BTThread extends Thread {
     private  OutputStream outStream;
     private byte[] inbuf;
 
-    public BTThread(BluetoothAdapter adapter, String addr) {
+    View text;
+
+    private boolean isCrash = false;
+
+    public BTThread(BluetoothAdapter adapter, String addr, View t) {
         BluetoothDevice device = adapter.getRemoteDevice(addr);
         BluetoothSocket temp = null;
         try {
@@ -29,12 +34,17 @@ public class BTThread extends Thread {
         } catch (IOException e) {
             Log.e(TAG, "Error occurred when creating input stream", e);
         }
+        if (temp == null) {
+            return;
+        }
         socket = temp;  // Creation succeeded
         inbuf = new byte[NUM_BYTES];   // Create the data buffer
+        text = t;
     }
 
     @Override
     public void run()  {
+        super.run();
         // Connect to the device
         try {
             // Connect to the remote device through the socket. This call blocks
@@ -72,19 +82,25 @@ public class BTThread extends Thread {
         int numBytes;  // Current number of bytes from read()
         while (true) {
             try {
-                numBytes = inStream.read(inbuf);
-                if (totBytes < NUM_BYTES) {
-                    //  Store, and keep reading
-                    for (int i = 0; i < numBytes; i++) {
-                        tempBuf[totBytes + i] = inbuf[i];
+                if (totBytes < NUM_BYTES) {  // If we still need to keep reading
+                    if (inStream.available() != 0) {  // If we have anything to read
+                        numBytes = inStream.read(inbuf);
+                        ((TextView)text).setText(inbuf[0] + " | " + numBytes);
+//                        if (numBytes > 0) {  // If we read anything
+//                            //  Store, and keep reading
+//                            for (int i = 0; i < numBytes; i++) {
+//                                tempBuf[totBytes + i] = inbuf[i];
+//                                Log.d(TAG, inbuf[i] + "\n");
+//                            }
+//                            totBytes += numBytes;
+//                        }
                     }
-                    totBytes += numBytes;
-                } else {  // totBytes = NUM_BYTES
+                } else {  // totBytes = NUM_BYTES, nothing left to read
                     // TODO: Analyze data
                     totBytes = 0;
+                    // TODO: Send data back??
+                    // write(...)
                 }
-
-                // TODO: Send data back??
             } catch (IOException e) {
                 Log.d(TAG, "Input stream was disconnected", e);
                 break;
