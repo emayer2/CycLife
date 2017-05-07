@@ -9,7 +9,7 @@
         android:id="@+id/main_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Activate" android:textSize="16pt"
+        android:text="Activate" android:textSize="17pt"
         app:layout_constraintLeft_toLeftOf="parent" />
     <ListView
         android:id="@+id/bt_list"

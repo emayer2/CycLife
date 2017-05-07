@@ -79,29 +79,28 @@ public class BluetoothActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
             {
-//                showToast("Pairing...");
+                showToast("Pairing...");
                 String addr = (String)deviceListView.getItemAtPosition(position);
                 addr = addr.split("Addr: ")[1];
                 BluetoothDevice device = bluetoothAdapter.getRemoteDevice(addr);
-//                try {
-//                    Method m = device.getClass().getMethod("createBond", (Class[])null);
-//                    m.invoke(device, (Object[])null);
-//                } catch (NoSuchMethodException e) {
-//                    e.printStackTrace();
-//                    showToast("Error pairing with device");
-//                    return;
-//                } catch (InvocationTargetException e) {
-//                    e.printStackTrace();
-//                    showToast("Error pairing with device");
-//                    return;
-//                } catch (IllegalAccessException e) {
-//                    e.printStackTrace();
-//                    showToast("Error pairing with device");
-//                    return;
-//                }
-//                showToast("Pair Successful!");
-                pairedDevices.add(device);
-                BTThread sock = new BTThread(bluetoothAdapter, addr, findViewById(R.id.main_text));
+                try {
+                    Method m = device.getClass().getMethod("createBond", (Class[])null);
+                    m.invoke(device, (Object[])null);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                    showToast("Error pairing with device");
+                    return;
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    showToast("Error pairing with device");
+                    return;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    showToast("Error pairing with device");
+                    return;
+                }
+                BTThread sock = new BTThread(bluetoothAdapter, addr,
+                        findViewById(R.id.main_text));
                 sock.start();
             }
         });

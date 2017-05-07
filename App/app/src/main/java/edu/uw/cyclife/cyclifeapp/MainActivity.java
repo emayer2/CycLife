@@ -8,17 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -51,26 +47,6 @@ public class MainActivity extends AppCompatActivity
 
     // UUID For Bluetooth
     private final String BT_UUID =  "00001101-0000-1000-8000-00805F9B34FB";
-
-    //    class BlinkThread extends Thread {
-//        boolean isOrange = false;
-//        public void run() {
-//            while (true) {
-//                if (isOrange) {
-//                    findViewById(R.id.ALARM_ID_HERE).setBackgroundResource(R.drawable.power_button_orange);
-//                } else {
-//                    findViewById(R.id.ALARM_ID_HERE).setBackgroundResource(R.drawable.power_button_black);
-//                }
-//                isOrange = !isOrange;
-//                try {
-//                    Thread.sleep(750);
-//                } catch (InterruptedException e) {
-//                    // Should never happen???
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -145,7 +121,7 @@ public class MainActivity extends AppCompatActivity
                 // TODO: Start bluetooth, start connection, run
             }
         });
-
+//
 //        deviceListView = (ListView) findViewById(R.id.bt_list);
 //        deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 //        deviceListView.setAdapter(deviceList);
@@ -155,29 +131,29 @@ public class MainActivity extends AppCompatActivity
 //            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
 //            {
 //                String addr = (String)deviceListView.getItemAtPosition(position);
-//                addr = addr.split(", ")[1];
+//                addr = addr.split("Addr: ")[1];
 //                ((TextView)findViewById(R.id.main_text)).setText(addr);
-////                BTThread sock = new BTThread(bluetoothAdapter, addr);
-////                sock.start();
+//                BTThread sock = new BTThread(bluetoothAdapter, addr);
+//                sock.start();
 //            }
 //        });
 
         // Setup battery
         setBatteryHeight(currHeight);
 
-        // Bluetooth discovery
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        filter.addAction(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(mReceiver, filter);
+//        // Bluetooth discovery
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+//        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+//        filter.addAction(BluetoothDevice.ACTION_FOUND);
+//        registerReceiver(mReceiver, filter);
 
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.CALL_PHONE}, 1);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+//        ActivityCompat.requestPermissions(this,
+//                new String[]{Manifest.permission.CALL_PHONE}, 1);
+//        ActivityCompat.requestPermissions(this,
+//                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+//        ActivityCompat.requestPermissions(this,
+//                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
 //        deviceList.add("1, 123456");
 //        deviceList.add("2, 142536");
@@ -213,7 +189,7 @@ public class MainActivity extends AppCompatActivity
         color += "00";
         View v = findViewById(R.id.main_battery_level);
         v.setBackgroundColor(Color.parseColor(color));
-        ConstraintLayout.LayoutParams p = (ConstraintLayout.LayoutParams)v.getLayoutParams();
+        ConstraintLayout.LayoutParams p = (ConstraintLayout.LayoutParams) v.getLayoutParams();
         p.height = h;
         v.setLayoutParams(p);
     }
@@ -271,8 +247,8 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             // Do nothing since we're in the home already
         } else if (id == R.id.nav_bluetooth) {
-            Intent bt = new Intent(this, BluetoothActivity.class);
-            startActivity(bt);
+            Intent si = new Intent(this, BluetoothActivity.class);
+            startActivity(si);
         } else if (id == R.id.nav_call) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                     == PackageManager.PERMISSION_GRANTED) {
