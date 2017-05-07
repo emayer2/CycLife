@@ -80,9 +80,9 @@ public class BluetoothActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
             {
 //                showToast("Pairing...");
-//                String addr = (String)deviceListView.getItemAtPosition(position);
-//                addr = addr.split("Addr: ")[1];
-//                BluetoothDevice device = bluetoothAdapter.getRemoteDevice(addr);
+                String addr = (String)deviceListView.getItemAtPosition(position);
+                addr = addr.split("Addr: ")[1];
+                BluetoothDevice device = bluetoothAdapter.getRemoteDevice(addr);
 //                try {
 //                    Method m = device.getClass().getMethod("createBond", (Class[])null);
 //                    m.invoke(device, (Object[])null);

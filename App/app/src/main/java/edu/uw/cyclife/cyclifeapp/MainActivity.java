@@ -146,21 +146,21 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        deviceListView = (ListView) findViewById(R.id.bt_list);
-        deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        deviceListView.setAdapter(deviceList);
-        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
-            {
-                String addr = (String)deviceListView.getItemAtPosition(position);
-                addr = addr.split(", ")[1];
-                ((TextView)findViewById(R.id.main_text)).setText(addr);
-//                BTThread sock = new BTThread(bluetoothAdapter, addr);
-//                sock.start();
-            }
-        });
+//        deviceListView = (ListView) findViewById(R.id.bt_list);
+//        deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+//        deviceListView.setAdapter(deviceList);
+//        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+//        {
+//            @Override
+//            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
+//            {
+//                String addr = (String)deviceListView.getItemAtPosition(position);
+//                addr = addr.split(", ")[1];
+//                ((TextView)findViewById(R.id.main_text)).setText(addr);
+////                BTThread sock = new BTThread(bluetoothAdapter, addr);
+////                sock.start();
+//            }
+//        });
 
         // Setup battery
         setBatteryHeight(currHeight);
@@ -179,11 +179,11 @@ public class MainActivity extends AppCompatActivity
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
-        deviceList.add("1, 123456");
-        deviceList.add("2, 142536");
-        deviceList.add("3, 165432");
-        deviceList.add("4, 198656");
-        deviceList.notifyDataSetChanged();
+//        deviceList.add("1, 123456");
+//        deviceList.add("2, 142536");
+//        deviceList.add("3, 165432");
+//        deviceList.add("4, 198656");
+//        deviceList.notifyDataSetChanged();
 
 
 //        // Enable bluetooth discovery
@@ -271,45 +271,8 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             // Do nothing since we're in the home already
         } else if (id == R.id.nav_bluetooth) {
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (bluetoothAdapter == null) {
-                // Device does not support Bluetooth
-                ((TextView)findViewById(R.id.main_text)).setText("No Bluetooth Support :(");
-            } else {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
-                    // Bluetooth found, check if enabled and prompt
-                    if (!bluetoothAdapter.isEnabled()) {
-                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                    }
-                    // Check if location enabled, and prompt
-                    if (!bluetoothAdapter.isEnabled()) {
-                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                    }
-                    if (!((LocationManager) getSystemService(Context.LOCATION_SERVICE))
-                            .isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                        ((TextView)findViewById(R.id.main_text)).setText("Location Not Turned On :(");
-                    } else {
-
-                        // Start discovery, first ask for location permissions
-                        // (for hosts of android OS >= 6.0)
-                        if (bluetoothAdapter.isDiscovering()) {
-                            bluetoothAdapter.cancelDiscovery();
-                        }
-                        deviceList.clear();
-                        pairedDevices = new HashSet<>();
-                        bluetoothAdapter.startDiscovery();
-                    }
-                } else {
-                    ((TextView) findViewById(R.id.main_text))
-                            .setText("Location Permission Not Enabled!");
-                }
-            }
-
+            Intent bt = new Intent(this, BluetoothActivity.class);
+            startActivity(bt);
         } else if (id == R.id.nav_call) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                     == PackageManager.PERMISSION_GRANTED) {
