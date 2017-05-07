@@ -8,13 +8,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -121,7 +125,16 @@ public class MainActivity extends AppCompatActivity
                 // TODO: Start bluetooth, start connection, run
             }
         });
-//
+
+        // Create an instance of GoogleAPIClient.
+//        if (mGoogleApiClient == null) {
+//            mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                    .addConnectionCallbacks(this)
+//                    .addOnConnectionFailedListener(this)
+//                    .addApi(LocationServices.API)
+//                    .build();
+//        }
+
 //        deviceListView = (ListView) findViewById(R.id.bt_list);
 //        deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 //        deviceListView.setAdapter(deviceList);
@@ -131,10 +144,10 @@ public class MainActivity extends AppCompatActivity
 //            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
 //            {
 //                String addr = (String)deviceListView.getItemAtPosition(position);
-//                addr = addr.split("Addr: ")[1];
+//                addr = addr.split(", ")[1];
 //                ((TextView)findViewById(R.id.main_text)).setText(addr);
-//                BTThread sock = new BTThread(bluetoothAdapter, addr);
-//                sock.start();
+////                BTThread sock = new BTThread(bluetoothAdapter, addr);
+////                sock.start();
 //            }
 //        });
 
