@@ -78,7 +78,8 @@ public class KillswitchActivity extends AppCompatActivity {
 
         emsEnabled = sharedPref.getBoolean("911Enabled", false);
         final String emsMessage = sharedPref.getString("UserName", "") + " " +
-                sharedPref.getString("EmergencyMessage", "Cyclist has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:");
+                sharedPref.getString("EmergencyMessage", "Cyclist has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:")
+                + "\n" + MainActivity.getLat() + "\n" + MainActivity.getLong();
 
         outOfTime = false;
         final Button killbutton = (Button)findViewById(R.id.kill_button);

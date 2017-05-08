@@ -155,6 +155,13 @@
         <item>3</item>
     </string-array>
 
+    <string name="latitude_label">Latitude</string>
+    <string name="longitude_label">Longitude</string>
+
+    <string name="no_location_detected">
+        No location detected. Make sure location is enabled on the device.
+    </string>
+
     <string-array name="multi_select_list_preference_default_value" />
 
     <string name="pref_title_system_sync_settings">System sync settings</string>

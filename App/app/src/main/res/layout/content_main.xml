@@ -25,6 +25,27 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/main_button"/>
+    <TextView
+        android:id="@+id/latitude_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:textIsSelectable="true"
+        android:textSize="@dimen/lat_long_text_size"
+        android:text="Latitude: 0.0"
+        />
+    <TextView
+        android:id="@+id/longitude_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/text_margin"
+        android:textIsSelectable="true"
+        android:textSize="@dimen/lat_long_text_size"
+        android:layout_marginLeft="20pt"
+        android:layout_marginStart="20pt"
+        android:text="Longitude: 0.0"
+        app:layout_constraintBottom_toBottomOf="parent"/>
     <ImageView
         android:background="@drawable/ic_menu_battery"
         android:id="@+id/main_battery"
