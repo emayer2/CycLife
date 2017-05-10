@@ -210,6 +210,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("contact3"));
             bindPreferenceSummaryToValue(findPreference("contact4"));
             bindPreferenceSummaryToValue(findPreference("contact5"));
+            bindPreferenceSummaryToValue(findPreference("contact6"));
+            bindPreferenceSummaryToValue(findPreference("contact7"));
+            bindPreferenceSummaryToValue(findPreference("contact8"));
         }
 
         @Override

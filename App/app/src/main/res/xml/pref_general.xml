@@ -74,6 +74,33 @@
             android:selectAllOnFocus="true"
             android:singleLine="true">
         </EditTextPreference>
+        <EditTextPreference
+            android:capitalize="words"
+            android:key="contact6"
+            android:title="Emergency Contact Number 6"
+            android:defaultValue=" "
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true">
+        </EditTextPreference>
+        <EditTextPreference
+            android:capitalize="words"
+            android:key="contact7"
+            android:title="Emergency Contact Number 7"
+            android:defaultValue=" "
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true">
+        </EditTextPreference>
+        <EditTextPreference
+            android:capitalize="words"
+            android:key="contact8"
+            android:title="Emergency Contact Number 8"
+            android:defaultValue=" "
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true">
+        </EditTextPreference>
         <!--<Preference-->
             <!--android:key="button_contact1"-->
             <!--android:title="Emergency Contact 1">-->
