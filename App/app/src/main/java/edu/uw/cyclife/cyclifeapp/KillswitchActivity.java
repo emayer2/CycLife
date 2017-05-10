@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.media.audiofx.BassBoost;
@@ -14,9 +16,11 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -24,6 +28,10 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -33,7 +41,8 @@ import java.util.concurrent.TimeUnit;
 import static android.R.id.message;
 
 
-public class KillswitchActivity extends AppCompatActivity {
+public class KillswitchActivity extends AppCompatActivity
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     TextView text1;
     TextView infoText;
     boolean outOfTime;
@@ -51,12 +60,43 @@ public class KillswitchActivity extends AppCompatActivity {
 
     SharedPreferences sharedPref = null;
 
+    /**
+     * Provides the entry point to Google Play services.
+     */
+    private GoogleApiClient mGoogleApiClient;
+
+    /**
+     * Represents a geographical location.
+     */
+    protected Location mLastLocation;
+
+    protected String mLatitudeLabel;
+    protected String mLongitudeLabel;
+    protected TextView mLatitudeText;
+    protected TextView mLongitudeText;
+    protected String mLat;
+    protected String mLong;
+    //protected String emergencyMessage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.kill_switch_timer);
+
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.CALL_PHONE}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+
+        mLatitudeLabel = getResources().getString(R.string.latitude_label);
+        mLongitudeLabel = getResources().getString(R.string.longitude_label);
+        mLatitudeText = (TextView) findViewById((R.id.latitude_text));
+        mLongitudeText = (TextView) findViewById((R.id.longitude_text));
+        // Build the location services request
+        buildGoogleApiClient();
 
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS},1);
 
@@ -69,7 +109,7 @@ public class KillswitchActivity extends AppCompatActivity {
         } else {
             ksLength = Integer.parseInt(killSwitchLength);
         }
-        String emergencyMessage = sharedPref.getString("EmergencyMessage", "");
+        final String emergencyMessage = sharedPref.getString("EmergencyMessage", "");
         contactNumbers = getEmergencyNumbers();
 
         text1=(TextView)findViewById(R.id.timer_countdown);
@@ -78,8 +118,7 @@ public class KillswitchActivity extends AppCompatActivity {
 
         emsEnabled = sharedPref.getBoolean("911Enabled", false);
         final String emsMessage = sharedPref.getString("UserName", "") + " " +
-                sharedPref.getString("EmergencyMessage", "Cyclist has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:")
-                + "\n" + MainActivity.getLat() + "\n" + MainActivity.getLong();
+                sharedPref.getString("EmergencyMessage", "Cyclist has crashed and is unresponsive. Please contact me to see if I'm alright, if not please call 911 and give them my location:");
 
         outOfTime = false;
         final Button killbutton = (Button)findViewById(R.id.kill_button);
@@ -122,7 +161,8 @@ public class KillswitchActivity extends AppCompatActivity {
                 for (int i = 0; i < contactNumbers.size(); i++) {
                     try {
                         SmsManager smsManager = SmsManager.getDefault();
-                        ArrayList<String> msgArray = smsManager.divideMessage(emsMessage);
+                        String finalMessage = emsMessage + "\n" + mLat + "\n" + mLong;
+                        ArrayList<String> msgArray = smsManager.divideMessage(finalMessage);
                         // Send a message to each of the emergency contacts
                         smsManager.sendMultipartTextMessage(contactNumbers.get(i), null, msgArray, null, null);
 
@@ -176,5 +216,80 @@ public class KillswitchActivity extends AppCompatActivity {
         }
 
         return contactNumbers;
+    }
+
+    /**
+     * Runs when a GoogleApiClient object successfully connects.
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // Provides a simple way of getting a device's location and is well suited for
+        // applications that do not require a fine-grained location and that do not need location
+        // updates. Gets the best and most recent location currently available, which may be null
+        // in rare cases when a location is not available.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLastLocation != null) {
+//            mLatitudeText.setText(String.format("%s: %f", mLatitudeLabel,
+//                    mLastLocation.getLatitude()));
+            mLat = (String.format("%s: %f", mLatitudeLabel,
+                    mLastLocation.getLatitude()));
+            mLong = (String.format("%s: %f", mLongitudeLabel,
+                    mLastLocation.getLongitude()));
+//            mLongitudeText.setText(String.format("%s: %f", mLongitudeLabel,
+//                    mLastLocation.getLongitude()));
+        } else {
+            Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i("MainActivity", "Connection suspended");
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
+        // onConnectionFailed.
+        Log.i("MainActivity", "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    /**
+     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
+     */
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 }
