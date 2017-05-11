@@ -115,33 +115,33 @@ public class MainActivity extends AppCompatActivity
     // UUID For Bluetooth
     private final String BT_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Discovery has found an object
-                BluetoothDevice foundDevice =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (!pairedDevices.contains(foundDevice)) {
-                    pairedDevices.add(foundDevice);
-                    String deviceName = foundDevice.getName();
-                    String deviceHWAddr = foundDevice.getAddress();
-                    CharSequence currText = ((TextView) findViewById(R.id.main_text)).getText();
-                    deviceList.add(currText.toString() + "\nDevice: " + deviceName +
-                            ", Addr: " + deviceHWAddr);
-                    deviceList.notifyDataSetChanged();
-                }
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                ((TextView) findViewById(R.id.main_text))
-                        .setText("Discovering...");
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                ((TextView) findViewById(R.id.main_text))
-                        .setText("Done Searching!");
-            }
-        }
-    };
+//    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//
+//            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+//                // Discovery has found an object
+//                BluetoothDevice foundDevice =
+//                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                if (!pairedDevices.contains(foundDevice)) {
+//                    pairedDevices.add(foundDevice);
+//                    String deviceName = foundDevice.getName();
+//                    String deviceHWAddr = foundDevice.getAddress();
+//                    CharSequence currText = ((TextView) findViewById(R.id.main_text)).getText();
+//                    deviceList.add(currText.toString() + "\nDevice: " + deviceName +
+//                            ", Addr: " + deviceHWAddr);
+//                    deviceList.notifyDataSetChanged();
+//                }
+//            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+//                ((TextView) findViewById(R.id.main_text))
+//                        .setText("Discovering...");
+//            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+//                ((TextView) findViewById(R.id.main_text))
+//                        .setText("Done Searching!");
+//            }
+//        }
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -295,12 +295,12 @@ public class MainActivity extends AppCompatActivity
         v.setLayoutParams(p);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Unregister the ACTION_FOUND receiver
-        unregisterReceiver(mReceiver);
-    }
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+//        // Unregister the ACTION_FOUND receiver
+//        unregisterReceiver(mReceiver);
+//    }
 
     @Override
     public void onBackPressed() {
@@ -524,11 +524,11 @@ public class MainActivity extends AppCompatActivity
 //        mLocationSettingsRequest = builder.build();
 //    }
 
-    public static String getLat() {
-        return mLat;
-    }
-
-    public static String getLong() {
-        return mLong;
-    }
+//    public static String getLat() {
+//        return mLat;
+//    }
+//
+//    public static String getLong() {
+//        return mLong;
+//    }
 }
