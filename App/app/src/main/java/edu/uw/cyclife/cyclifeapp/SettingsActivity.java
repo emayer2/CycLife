@@ -202,7 +202,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("UserName"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
             bindPreferenceSummaryToValue(findPreference("KillSwitchLength"));
             bindPreferenceSummaryToValue(findPreference("EmergencyMessage"));
             bindPreferenceSummaryToValue(findPreference("contact1"));

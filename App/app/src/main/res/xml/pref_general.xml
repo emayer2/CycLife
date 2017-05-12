@@ -16,14 +16,6 @@
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
     <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
-    <ListPreference
-        android:defaultValue="-1"
-        android:entries="@array/pref_example_list_titles"
-        android:entryValues="@array/pref_example_list_values"
-        android:key="example_list"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_add_friends_to_messages" />
     <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:key="button_contact_category_key"
@@ -31,6 +23,7 @@
         android:persistent="false">
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact1"
             android:title="Emergency Contact Number 1"
             android:defaultValue="5552368"
@@ -40,6 +33,7 @@
         </EditTextPreference>
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact2"
             android:title="Emergency Contact Number 2"
             android:defaultValue=" "
@@ -49,6 +43,7 @@
         </EditTextPreference>
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact3"
             android:title="Emergency Contact Number 3"
             android:defaultValue=" "
@@ -58,6 +53,7 @@
         </EditTextPreference>
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact4"
             android:title="Emergency Contact Number 4"
             android:defaultValue=" "
@@ -67,6 +63,7 @@
         </EditTextPreference>
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact5"
             android:title="Emergency Contact Number 5"
             android:defaultValue=" "
@@ -76,6 +73,7 @@
         </EditTextPreference>
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact6"
             android:title="Emergency Contact Number 6"
             android:defaultValue=" "
@@ -85,6 +83,7 @@
         </EditTextPreference>
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact7"
             android:title="Emergency Contact Number 7"
             android:defaultValue=" "
@@ -94,6 +93,7 @@
         </EditTextPreference>
         <EditTextPreference
             android:capitalize="words"
+            android:inputType="number"
             android:key="contact8"
             android:title="Emergency Contact Number 8"
             android:defaultValue=" "
@@ -138,6 +138,7 @@
         android:title="EMS Enabled (Calls 911)" />
     <EditTextPreference
         android:defaultValue="60"
+        android:inputType="number"
         android:key="KillSwitchLength"
         android:selectAllOnFocus="true"
         android:singleLine="true"
