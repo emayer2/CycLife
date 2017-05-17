@@ -3,13 +3,20 @@ package edu.uw.cyclife.cyclifeapp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.UUID;
 
 
@@ -19,18 +26,18 @@ public class BTThread extends Thread {
     private final UUID BT_UUID =  UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private BluetoothSocket socket = null;
     private InputStream inStream;
-    private  OutputStream outStream;
+    private OutputStream outStream;
     private byte[] inbuf;
+    FileOutputStream outputStreamWriter;
 
     View text;
 
     private boolean isCrash = false;
 
-    public BTThread(BluetoothAdapter adapter, String addr, View t) {
-        BluetoothDevice device = adapter.getRemoteDevice(addr);
+    public BTThread(BluetoothAdapter adapter, BluetoothDevice device) {
         BluetoothSocket temp = null;
         try {
-            temp = device.createRfcommSocketToServiceRecord(BT_UUID);
+            temp = device.createInsecureRfcommSocketToServiceRecord(BT_UUID);
         } catch (IOException e) {
             Log.e(TAG, "Error occurred when creating input stream", e);
         }
@@ -39,7 +46,8 @@ public class BTThread extends Thread {
         }
         socket = temp;  // Creation succeeded
         inbuf = new byte[NUM_BYTES];   // Create the data buffer
-        text = t;
+        adapter.cancelDiscovery();
+        openFile();
     }
 
     @Override
@@ -80,31 +88,102 @@ public class BTThread extends Thread {
         byte[] tempBuf = new byte[NUM_BYTES];
         int totBytes = 0;  // Total number of bytes read
         int numBytes;  // Current number of bytes from read()
+
+        int byteCount = 0;
+        int currData = 0;
+        int numData = 6;
+
+        float data[] = new float[numData];
+        byte bytes[] = new byte[4];
+        for (int i = 0; i < numData; i++) {
+            data[i] = 0;
+        }
+        boolean connected = false;
         while (true) {
             try {
-                if (totBytes < NUM_BYTES) {  // If we still need to keep reading
-                    if (inStream.available() != 0) {  // If we have anything to read
-                        numBytes = inStream.read(inbuf);
-                        ((TextView)text).setText(inbuf[0] + " | " + numBytes);
-//                        if (numBytes > 0) {  // If we read anything
-//                            //  Store, and keep reading
-//                            for (int i = 0; i < numBytes; i++) {
-//                                tempBuf[totBytes + i] = inbuf[i];
-//                                Log.d(TAG, inbuf[i] + "\n");
-//                            }
-//                            totBytes += numBytes;
-//                        }
+                if (!connected) {
+                    outStream.write(new byte[]{(byte)0b11001010});
+                    connected = true;
+                } else if (inStream.available() != 0) {  // If we have anything to read
+                    numBytes = inStream.read(inbuf);
+                    for (int i = 0; i < numBytes; i++) {
+                        bytes[byteCount] = inbuf[i];
+                        byteCount++;
+                        if (byteCount == 4) {
+                            data[currData] = ByteBuffer.wrap(bytes)
+                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
+//                            data  = ByteBuffer.wrap(bytes)
+//                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                            byteCount = 0;
+//                            writeToFile(data);
+                            if (currData == numData - 1) {
+                                writeToFile(data);
+                            }
+                            currData = (currData + 1) % numData;
+                        }
                     }
-                } else {  // totBytes = NUM_BYTES, nothing left to read
-                    // TODO: Analyze data
-                    totBytes = 0;
-                    // TODO: Send data back??
-                    // write(...)
                 }
             } catch (IOException e) {
+                try {
+                    outputStreamWriter.close();
+                }
+                catch (IOException ef) {
+                    Log.e("Exception", "File close failed: " + ef.toString());
+                }
                 Log.d(TAG, "Input stream was disconnected", e);
                 break;
             }
+        }
+    }
+
+    private void openFile() {
+        String state = Environment.getExternalStorageState();
+        while (!Environment.MEDIA_MOUNTED.equals(state)) {
+            // Wait...
+        }
+
+        File dir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "data");
+        if (!dir.exists() && !dir.mkdirs()) {
+            Log.e("Exception", "File directory creation failed");
+        }  // This will work everytime since I made the directory already (previous run)
+
+        int runNum = dir.listFiles().length;
+        File f = new File(dir, "run" + runNum + ".txt");
+        try {
+            outputStreamWriter = new FileOutputStream(f, true);
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File not found: " + e.toString());
+        }
+    }
+
+    private void writeToFile(float data[]) {
+        String state = Environment.getExternalStorageState();
+        while (!Environment.MEDIA_MOUNTED.equals(state)) {
+            // Wait...
+        }
+
+        File dir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "data");
+        if (!dir.exists() && !dir.mkdirs()) {
+            Log.e("Exception", "File directory creation failed");
+        }  // This will work everytime since I made the directory already (previous run)
+
+        StringBuilder str = new StringBuilder();
+        str.append(data[0]);
+        for (int i = 1; i < data.length; i++) {
+            str.append(", " + data[i]);
+        }
+        str.append("\n");
+        Log.e("Exception", str.toString());
+
+        File f = new File(dir, "run.txt");
+        try {
+            outputStreamWriter.write(str.toString().getBytes());
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
         }
     }
 }

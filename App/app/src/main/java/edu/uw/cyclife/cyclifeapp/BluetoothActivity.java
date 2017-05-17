@@ -80,7 +80,7 @@ public class BluetoothActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
             {
-                showToast("Pairing...");
+                showToast("Connecting...");
                 String addr = (String)deviceListView.getItemAtPosition(position);
                 addr = addr.split("Addr: ")[1];
                 BluetoothDevice device = bluetoothAdapter.getRemoteDevice(addr);
@@ -100,8 +100,7 @@ public class BluetoothActivity extends AppCompatActivity {
                     showToast("Error pairing with device");
                     return;
                 }
-                BTThread sock = new BTThread(bluetoothAdapter, addr,
-                        findViewById(R.id.main_text));
+                BTThread sock = new BTThread(bluetoothAdapter, device);
                 sock.start();
             }
         });
