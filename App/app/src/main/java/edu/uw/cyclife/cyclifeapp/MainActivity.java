@@ -8,19 +8,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.provider.Settings;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -32,7 +28,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -41,26 +36,25 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.vision.text.Text;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private static final int REQUEST_ENABLE_BT = 1;  // For notify intent
+    public static final int REQUEST_ENABLE_BT = 1;  // For notify intent
     private static String mLat;
     private static String mLong;
-    private BluetoothAdapter bluetoothAdapter;
-    private Set<BluetoothDevice> pairedDevices;
-    private ArrayAdapter<String> deviceList;
-    private ListView deviceListView;
+    public static BluetoothAdapter bluetoothAdapter;
+    public static Set<BluetoothDevice> foundDevices;
+    public static Set<BluetoothDevice> pairedDevices;
+    public static ArrayAdapter<String> fdeviceList;
+    public static ArrayAdapter<String> pdeviceList;
+    public static ListView fdeviceListView;
+    public static ListView pdeviceListView;
+    public static BTThread sock;
     private boolean isMainButtonRed = true;
 
     private final int MAX_BAT_HEIGHT = 430;
@@ -115,33 +109,34 @@ public class MainActivity extends AppCompatActivity
     // UUID For Bluetooth
     private final String BT_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
-//    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            String action = intent.getAction();
-//
-//            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-//                // Discovery has found an object
-//                BluetoothDevice foundDevice =
-//                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                if (!pairedDevices.contains(foundDevice)) {
-//                    pairedDevices.add(foundDevice);
-//                    String deviceName = foundDevice.getName();
-//                    String deviceHWAddr = foundDevice.getAddress();
-//                    CharSequence currText = ((TextView) findViewById(R.id.main_text)).getText();
-//                    deviceList.add(currText.toString() + "\nDevice: " + deviceName +
-//                            ", Addr: " + deviceHWAddr);
-//                    deviceList.notifyDataSetChanged();
-//                }
-//            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-//                ((TextView) findViewById(R.id.main_text))
-//                        .setText("Discovering...");
-//            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-//                ((TextView) findViewById(R.id.main_text))
-//                        .setText("Done Searching!");
-//            }
-//        }
-//    };
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Discovery has found an object
+                BluetoothDevice foundDevice =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (!MainActivity.foundDevices.contains(foundDevice)) {
+                    MainActivity.foundDevices.add(foundDevice);
+                    String deviceName = foundDevice.getName();
+                    String deviceHWAddr = foundDevice.getAddress();
+                    String addstr = "";
+                    if (deviceName != null) {
+                        addstr += "\nDevice: " + deviceName + ", ";
+                    }
+                    addstr += "Addr: " + deviceHWAddr;
+                    MainActivity.fdeviceList.add(addstr);
+                    MainActivity.fdeviceList.notifyDataSetChanged();
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                showToast("Discovering...");
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                showToast("Done Searching!");
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +144,17 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.CALL_PHONE}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.BLUETOOTH}, 1);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.BLUETOOTH_ADMIN}, 1);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -160,11 +166,6 @@ public class MainActivity extends AppCompatActivity
                 setBatteryHeight(currHeight);
             }
         });
-
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
         mLatitudeLabel = getResources().getString(R.string.latitude_label);
         mLongitudeLabel = getResources().getString(R.string.longitude_label);
@@ -184,24 +185,27 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        final Button button = (Button) findViewById(R.id.main_button);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (isMainButtonRed) {
-                    // Switch to green
-                    findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_green);
-                    ((TextView) findViewById(R.id.main_text))
-                            .setText("Deactivate");
-                } else {
-                    findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
-                    ((TextView) findViewById(R.id.main_text))
-                            .setText("Activate");
-                }
-                isMainButtonRed = !isMainButtonRed;
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-                // TODO: Start bluetooth, start connection, run
-            }
-        });
+        // Ensure location is enabled
+        if (!((LocationManager) getSystemService(Context.LOCATION_SERVICE))
+                .isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            showToast("Please turn on location");
+            Intent s = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivityForResult(s, 1);
+        }
+
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, MainActivity.REQUEST_ENABLE_BT);
+        }
+
+        // Bluetooth discovery
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(mReceiver, filter);
 
         // Create an instance of GoogleAPIClient.
 //        if (mGoogleApiClient == null) {
@@ -212,51 +216,43 @@ public class MainActivity extends AppCompatActivity
 //                    .build();
 //        }
 
-//        deviceListView = (ListView) findViewById(R.id.bt_list);
-//        deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-//        deviceListView.setAdapter(deviceList);
-//        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-//        {
-//            @Override
-//            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
-//            {
-//                String addr = (String)deviceListView.getItemAtPosition(position);
-//                addr = addr.split(", ")[1];
-//                ((TextView)findViewById(R.id.main_text)).setText(addr);
-////                BTThread sock = new BTThread(bluetoothAdapter, addr);
-////                sock.start();
-//            }
-//        });
-
         // Setup battery
         setBatteryHeight(currHeight);
+    }
 
-//        // Bluetooth discovery
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-//        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-//        filter.addAction(BluetoothDevice.ACTION_FOUND);
-//        registerReceiver(mReceiver, filter);
+    public void searchConnect(View v) {
+        pairedDevices = bluetoothAdapter.getBondedDevices();
 
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.CALL_PHONE}, 1);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        if (isMainButtonRed) {
+            // Switch to green
+            findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_green);
+            ((TextView) findViewById(R.id.main_text))
+                    .setText("Deactivate");
+            BluetoothDevice connDevice = null;
+            for (BluetoothDevice b : pairedDevices) {
+                if (b.getName().equals("CycLifeModule")) {
+                    connDevice = b;
+                    break;
+                }
+            }
+            if (connDevice == null) {
+                Intent si = new Intent(this, BluetoothActivity.class);
+                startActivity(si);
+            } else {
+                showToast("Connecting...");
+                sock = new BTThread(MainActivity.bluetoothAdapter, connDevice);
+                sock.start();
+            }
+        } else {
+            findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
+            ((TextView) findViewById(R.id.main_text))
+                    .setText("Activate");
+        }
+        isMainButtonRed = !isMainButtonRed;
+    }
 
-//        deviceList.add("1, 123456");
-//        deviceList.add("2, 142536");
-//        deviceList.add("3, 165432");
-//        deviceList.add("4, 198656");
-//        deviceList.notifyDataSetChanged();
-
-
-//        // Enable bluetooth discovery
-//        Intent discoverableIntent =
-//                new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-//        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-//        startActivity(discoverableIntent);
+    private void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -295,12 +291,12 @@ public class MainActivity extends AppCompatActivity
         v.setLayoutParams(p);
     }
 
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        // Unregister the ACTION_FOUND receiver
-//        unregisterReceiver(mReceiver);
-//    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister the ACTION_FOUND receiver
+        unregisterReceiver(mReceiver);
+    }
 
     @Override
     public void onBackPressed() {
@@ -347,9 +343,48 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             // Do nothing since we're in the home already
-        } else if (id == R.id.nav_bluetooth) {
-            Intent si = new Intent(this, BluetoothActivity.class);
-            startActivity(si);
+        } else if (id == R.id.nav_bluetooth) {  // TODO: Remove this
+//            Intent si = new Intent(this, BluetoothActivity.class);
+//            startActivity(si);
+//            MainActivity.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//            if (MainActivity.bluetoothAdapter == null) {
+//                // Device does not support Bluetooth
+//                ((TextView)findViewById(R.id.main_text)).setText("No Bluetooth Support :(");
+//            } else {
+//                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+//                        == PackageManager.PERMISSION_GRANTED &&
+//                        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                                == PackageManager.PERMISSION_GRANTED) {
+//                    // Bluetooth found, check if enabled and prompt
+//                    if (!MainActivity.bluetoothAdapter.isEnabled()) {
+//                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                        startActivityForResult(enableBtIntent, MainActivity.REQUEST_ENABLE_BT);
+//                    }
+//                    // Check if location enabled, and prompt
+//                    if (!MainActivity.bluetoothAdapter.isEnabled()) {
+//                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                        startActivityForResult(enableBtIntent, MainActivity.REQUEST_ENABLE_BT);
+//                    }
+//                    if (!((LocationManager) getSystemService(Context.LOCATION_SERVICE))
+//                            .isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//                        ((TextView)findViewById(R.id.main_text)).setText("Location Not Turned On :(");
+//                    } else {
+//
+//                        // Start discovery, first ask for location permissions
+//                        // (for hosts of android OS >= 6.0)
+//                        if (MainActivity.bluetoothAdapter.isDiscovering()) {
+//                            MainActivity.bluetoothAdapter.cancelDiscovery();
+//                        }
+//                        MainActivity.deviceList.clear();
+//                        MainActivity.foundDevices = new HashSet<>();
+//                        MainActivity.pairedDevices = new HashSet<>();
+//                        MainActivity.bluetoothAdapter.startDiscovery();
+//                    }
+//                } else {
+//                    ((TextView) findViewById(R.id.main_text))
+//                            .setText("Location Permission Not Enabled!");
+//                }
+//            }
         } else if (id == R.id.nav_call) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                     == PackageManager.PERMISSION_GRANTED) {

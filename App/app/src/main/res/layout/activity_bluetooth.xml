@@ -6,17 +6,33 @@
     android:layout_height="match_parent"
     tools:context="edu.uw.cyclife.cyclifeapp.BluetoothActivity">
     <TextView
-        android:id="@+id/main_text"
+        android:id="@+id/pair_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Activate" android:textSize="17pt"
+        android:text="Paired Devices"
+        android:textSize="17pt"
         app:layout_constraintLeft_toLeftOf="parent" />
     <ListView
-        android:id="@+id/bt_list"
+        android:id="@+id/btp_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10px"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/main_text">
+        app:layout_constraintTop_toBottomOf="@id/pair_text">
+    </ListView>
+    <TextView
+        android:id="@+id/found_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nearby Devices" android:textSize="17pt"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btp_list" />
+    <ListView
+        android:id="@+id/btf_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10px"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/found_text">
     </ListView>
 </android.support.constraint.ConstraintLayout>

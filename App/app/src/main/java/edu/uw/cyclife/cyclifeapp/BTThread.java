@@ -148,7 +148,13 @@ public class BTThread extends Thread {
             Log.e("Exception", "File directory creation failed");
         }  // This will work everytime since I made the directory already (previous run)
 
-        int runNum = dir.listFiles().length;
+        int runNum = 0;
+        if (dir != null) {
+            File[] f = dir.listFiles();
+            if (f != null) {
+                runNum = f.length;
+            }
+        }
         File f = new File(dir, "run" + runNum + ".txt");
         try {
             outputStreamWriter = new FileOutputStream(f, true);

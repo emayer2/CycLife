@@ -26,44 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BluetoothActivity extends AppCompatActivity {
-    private static final int REQUEST_ENABLE_BT = 1;  // For notify intent
-    private BluetoothAdapter bluetoothAdapter;
-    private Set<BluetoothDevice> foundDevices;
-    private Set<BluetoothDevice> pairedDevices;
-    private ArrayAdapter<String> deviceList;
-    private ListView deviceListView;
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Discovery has found an object
-                BluetoothDevice foundDevice =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (!foundDevices.contains(foundDevice)) {
-                    foundDevices.add(foundDevice);
-                    String deviceName = foundDevice.getName();
-                    String deviceHWAddr = foundDevice.getAddress();
-                    String addstr = "";
-                    if (deviceName != null) {
-                        addstr += "\nDevice: " + deviceName +", ";
-                    }
-                    addstr += "Addr: " + deviceHWAddr;
-                    deviceList.add(addstr);
-                    deviceList.notifyDataSetChanged();
-                }
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                ((TextView) findViewById(R.id.main_text))
-                        .setText("Discovering...");
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                ((TextView) findViewById(R.id.main_text))
-                        .setText("Done Searching!");
-            }
-        }
-    };
-
     private void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
@@ -72,18 +34,52 @@ public class BluetoothActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
-        deviceListView = (ListView) findViewById(R.id.bt_list);
-        deviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        deviceListView.setAdapter(deviceList);
-        deviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+
+        // Paired devices setup
+        MainActivity.pdeviceListView = (ListView) findViewById(R.id.btp_list);
+        MainActivity.pdeviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        MainActivity.pdeviceListView.setAdapter(MainActivity.pdeviceList);
+        MainActivity.pdeviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
             {
                 showToast("Connecting...");
-                String addr = (String)deviceListView.getItemAtPosition(position);
+                String addr = (String)MainActivity.pdeviceListView.getItemAtPosition(position);
                 addr = addr.split("Addr: ")[1];
-                BluetoothDevice device = bluetoothAdapter.getRemoteDevice(addr);
+                BluetoothDevice device = MainActivity.bluetoothAdapter.getRemoteDevice(addr);
+                MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device);
+                MainActivity.sock.start();
+                finish();
+            }
+        });
+
+        // Add already paired devices
+        for (BluetoothDevice b : MainActivity.pairedDevices) {
+            String deviceName = b.getName();
+            String deviceHWAddr = b.getAddress();
+            String addstr = "";
+            if (deviceName != null) {
+                addstr += "\nDevice: " + deviceName + ", ";
+            }
+            addstr += "Addr: " + deviceHWAddr;
+            MainActivity.pdeviceList.add(addstr);
+        }
+        MainActivity.pdeviceList.notifyDataSetChanged();
+
+        // Found devices setup
+        MainActivity.fdeviceListView = (ListView) findViewById(R.id.btf_list);
+        MainActivity.fdeviceList = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        MainActivity.fdeviceListView.setAdapter(MainActivity.fdeviceList);
+        MainActivity.fdeviceListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3)
+            {
+                showToast("Connecting...");
+                String addr = (String)MainActivity.fdeviceListView.getItemAtPosition(position);
+                addr = addr.split("Addr: ")[1];
+                BluetoothDevice device = MainActivity.bluetoothAdapter.getRemoteDevice(addr);
                 try {
                     Method m = device.getClass().getMethod("createBond", (Class[])null);
                     m.invoke(device, (Object[])null);
@@ -100,59 +96,46 @@ public class BluetoothActivity extends AppCompatActivity {
                     showToast("Error pairing with device");
                     return;
                 }
-                BTThread sock = new BTThread(bluetoothAdapter, device);
-                sock.start();
+                MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device);
+                MainActivity.sock.start();
+                finish();
             }
         });
 
-        // Bluetooth discovery
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        filter.addAction(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(mReceiver, filter);
-
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
+        if (MainActivity.bluetoothAdapter == null) {
             // Device does not support Bluetooth
-            ((TextView)findViewById(R.id.main_text)).setText("No Bluetooth Support :(");
+            showToast("No Bluetooth Support :(");
         } else {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED &&
                     ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                             == PackageManager.PERMISSION_GRANTED) {
                 // Bluetooth found, check if enabled and prompt
-                if (!bluetoothAdapter.isEnabled()) {
+                if (!MainActivity.bluetoothAdapter.isEnabled()) {
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                    startActivityForResult(enableBtIntent, MainActivity.REQUEST_ENABLE_BT);
                 }
                 // Check if location enabled, and prompt
-                if (!bluetoothAdapter.isEnabled()) {
+                if (!MainActivity.bluetoothAdapter.isEnabled()) {
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                    startActivityForResult(enableBtIntent, MainActivity.REQUEST_ENABLE_BT);
                 }
                 if (!((LocationManager) getSystemService(Context.LOCATION_SERVICE))
                         .isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    ((TextView)findViewById(R.id.main_text)).setText("Location Not Turned On :(");
+                    showToast("Location Not Turned On :(");
                 } else {
 
                     // Start discovery, first ask for location permissions
                     // (for hosts of android OS >= 6.0)
-                    if (bluetoothAdapter.isDiscovering()) {
-                        bluetoothAdapter.cancelDiscovery();
+                    if (MainActivity.bluetoothAdapter.isDiscovering()) {
+                        MainActivity.bluetoothAdapter.cancelDiscovery();
                     }
-                    deviceList.clear();
-                    foundDevices = new HashSet<>();
-                    pairedDevices = new HashSet<>();
-                    bluetoothAdapter.startDiscovery();
+                    MainActivity.fdeviceList.clear();
+                    MainActivity.foundDevices = new HashSet<>();
+                    MainActivity.bluetoothAdapter.startDiscovery();
                 }
             } else {
-                ((TextView) findViewById(R.id.main_text))
-                        .setText("Location Permission Not Enabled!");
+                showToast("Location Permission Not Enabled!");
             }
         }
     }

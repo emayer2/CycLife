@@ -10,6 +10,7 @@
 
     <Button
         android:id="@+id/main_button"
+        android:onClick="searchConnect"
         android:background="@drawable/power_button_red"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
