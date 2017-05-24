@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity
             findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
             ((TextView) findViewById(R.id.main_text))
                     .setText("Activate");
+            //sock.interrupt();
         }
         isMainButtonRed = !isMainButtonRed;
     }

@@ -193,7 +193,7 @@ public class KillswitchActivity extends AppCompatActivity
                     ks.cancel();
                     findViewById(R.id.kill_button).setBackgroundResource(R.drawable.power_button_green);
                     text1.setText("Emergency Message Cancelled");
-                    (findViewById(R.id.main_button)).performClick();
+                    //(findViewById(R.id.main_button)).performClick();
                 }
             }
         });
@@ -201,11 +201,12 @@ public class KillswitchActivity extends AppCompatActivity
 
     public List<String> getEmergencyNumbers() {
         List<String> contactNumbers = new ArrayList<String>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 8; i++) {
             String contact = sharedPref.getString("contact" + i, "");
             if (!contact.equals("") || !contact.equals(" ") || !contact.equals("555-2368")) {
                 contactNumbers.add(contact);
             }
+            //Toast.makeText(this, contact, Toast.LENGTH_LONG).show();
         }
 
         return contactNumbers;
