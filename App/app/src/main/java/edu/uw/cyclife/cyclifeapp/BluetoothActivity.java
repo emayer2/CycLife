@@ -48,7 +48,8 @@ public class BluetoothActivity extends AppCompatActivity {
                 String addr = (String)MainActivity.pdeviceListView.getItemAtPosition(position);
                 addr = addr.split("Addr: ")[1];
                 BluetoothDevice device = MainActivity.bluetoothAdapter.getRemoteDevice(addr);
-                MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device);
+                MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device,
+                        MainActivity.ks);
                 MainActivity.sock.start();
                 finish();
             }
@@ -96,7 +97,8 @@ public class BluetoothActivity extends AppCompatActivity {
                     showToast("Error pairing with device");
                     return;
                 }
-                MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device);
+                MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device,
+                        MainActivity.ks);
                 MainActivity.sock.start();
                 finish();
             }

@@ -36,14 +36,18 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.data.DataBufferObserver;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, Observer {
     public static final int REQUEST_ENABLE_BT = 1;  // For notify intent
     private static String mLat;
     private static String mLong;
@@ -56,6 +60,7 @@ public class MainActivity extends AppCompatActivity
     public static ListView pdeviceListView;
     public static BTThread sock;
     private boolean isMainButtonRed = true;
+    public static KSWrapper ks;
 
     private final int MAX_BAT_HEIGHT = 430;
     private int currHeight = 30;
@@ -138,6 +143,20 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    public void observe(Observable o) {
+        o.addObserver(this);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        KSWrapper k = (KSWrapper) o;
+        if (k.getAlarm()) {
+            k.alarmOff();
+            Intent ks = new Intent(this, KillswitchActivity.class);
+            startActivityForResult(ks, 1);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,6 +235,10 @@ public class MainActivity extends AppCompatActivity
 //                    .build();
 //        }
 
+        // Start observing killswitch watcher
+        ks = new KSWrapper();
+        observe(ks);
+
         // Setup battery
         setBatteryHeight(currHeight);
     }
@@ -240,7 +263,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(si);
             } else {
                 showToast("Connecting...");
-                sock = new BTThread(MainActivity.bluetoothAdapter, connDevice);
+                sock = new BTThread(MainActivity.bluetoothAdapter, connDevice, ks);
                 sock.start();
             }
         } else {

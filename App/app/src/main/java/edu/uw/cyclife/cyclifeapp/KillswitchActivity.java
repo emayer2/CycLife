@@ -10,6 +10,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -192,6 +193,7 @@ public class KillswitchActivity extends AppCompatActivity
                     ks.cancel();
                     findViewById(R.id.kill_button).setBackgroundResource(R.drawable.power_button_green);
                     text1.setText("Emergency Message Cancelled");
+                    (findViewById(R.id.main_button)).performClick();
                 }
             }
         });

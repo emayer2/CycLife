@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Observable;
 import java.util.UUID;
 
 
@@ -28,13 +29,17 @@ public class BTThread extends Thread {
     private InputStream inStream;
     private OutputStream outStream;
     private byte[] inbuf;
-    FileOutputStream outputStreamWriter;
+    private FileOutputStream outputStreamWriter;
+    private KSWrapper ksWatcher;
 
-    View text;
+    // Alarm packet
+    public final byte ALARM = 0b01101111;
+
 
     private boolean isCrash = false;
 
-    public BTThread(BluetoothAdapter adapter, BluetoothDevice device) {
+    public BTThread(BluetoothAdapter adapter, BluetoothDevice device,
+                    KSWrapper ks) {
         BluetoothSocket temp = null;
         try {
             temp = device.createInsecureRfcommSocketToServiceRecord(BT_UUID);
@@ -48,6 +53,7 @@ public class BTThread extends Thread {
         inbuf = new byte[NUM_BYTES];   // Create the data buffer
         adapter.cancelDiscovery();
         openFile();
+        ksWatcher = ks;
     }
 
     @Override
@@ -99,14 +105,20 @@ public class BTThread extends Thread {
             data[i] = 0;
         }
         boolean connected = false;
-        while (true) {
+        boolean alarm = false;
+        while (!alarm) {
             try {
                 if (!connected) {
                     outStream.write(new byte[]{(byte)0b11001010});
                     connected = true;
                 } else if (inStream.available() != 0) {  // If we have anything to read
                     numBytes = inStream.read(inbuf);
-                    for (int i = 0; i < numBytes; i++) {
+                    for (int i = 0; i < numBytes && !alarm; i++) {
+                        if (inbuf[i] == ALARM) {
+                            ksWatcher.alarmOn();
+                            alarm = true;
+                            break;
+                        }
                         bytes[byteCount] = inbuf[i];
                         byteCount++;
                         if (byteCount == 4) {
