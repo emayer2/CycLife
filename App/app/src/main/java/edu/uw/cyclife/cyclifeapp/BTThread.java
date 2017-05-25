@@ -18,10 +18,11 @@ import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.UUID;
 
 
-public class BTThread extends Thread {
+public class BTThread extends Thread implements Observer {
     private final int NUM_BYTES = 900;
     private final String TAG = getClass().getSimpleName();
     private final UUID BT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -53,6 +54,19 @@ public class BTThread extends Thread {
         adapter.cancelDiscovery();
         openFile();
         ksWatcher = ks;
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        KSWrapper k = (KSWrapper)o;
+        if (k.getAlarm()) {
+            try {
+                socket.close();
+                outputStreamWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -104,24 +118,6 @@ public class BTThread extends Thread {
             data[i] = 0;
         }
         boolean connected = false;
-        boolean alarm = false;
-
-
-        try {
-            outStream.write(0b10010011);
-        } catch (IOException e) {
-            try {
-                outputStreamWriter.close();
-            } catch (IOException ef) {
-                Log.e("Exception", "File close failed: " + ef.toString());
-            }
-            Log.d(TAG, "Input stream was disconnected", e);
-        }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         boolean done = false;
         while (!done) {
             try {

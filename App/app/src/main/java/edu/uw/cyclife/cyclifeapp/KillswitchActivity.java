@@ -280,17 +280,17 @@ public class KillswitchActivity extends AppCompatActivity
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-        ks.cancel();
-        MainActivity.ks.alarmOff();
-        r.stop();
-        vib.cancel();
-        BluetoothDevice connDevice = null;
-        for (BluetoothDevice b : MainActivity.pairedDevices) {
-            if (b.getName().equals("CycLifeModule")) {
-                connDevice = b;
-                break;
-            }
-        }
+//        ks.cancel();
+//        MainActivity.ks.alarmOff();
+//        r.stop();
+//        vib.cancel();
+//        BluetoothDevice connDevice = null;
+//        for (BluetoothDevice b : MainActivity.pairedDevices) {
+//            if (b.getName().equals("CycLifeModule")) {
+//                connDevice = b;
+//                break;
+//            }
+//        }
 //        showToast("Connecting...");
 //        MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, connDevice,
 //                MainActivity.ks);
@@ -300,6 +300,15 @@ public class KillswitchActivity extends AppCompatActivity
 //    private void showToast(String message) {
 //        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
 //    }
+
+    @Override
+    public void onBackPressed() {
+        ks.cancel();
+        MainActivity.ks.alarmOff();
+        r.stop();
+        vib.cancel();
+        finish();
+    }
 
     /**
      * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.

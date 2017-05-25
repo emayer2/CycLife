@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     public static boolean wasCrashed = false;
     private boolean isMainButtonRed = true;
     public static KSWrapper ks;
+    public static KSWrapper in;
 
     private final int MAX_BAT_HEIGHT = 430;
     private int currHeight = 30;
@@ -152,7 +153,6 @@ public class MainActivity extends AppCompatActivity
     public void update(Observable o, Object arg) {
         KSWrapper k = (KSWrapper) o;
         if (k.getAlarm()) {
-            k.alarmOff();
             wasCrashed = true;
 //            (findViewById(R.id.main_button)).performClick();
 //            findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
@@ -244,6 +244,7 @@ public class MainActivity extends AppCompatActivity
 
         // Start observing killswitch watcher
         ks = new KSWrapper();
+        in = new KSWrapper();
         observe(ks);
 
         // Setup battery
@@ -271,13 +272,14 @@ public class MainActivity extends AppCompatActivity
             } else {
                 showToast("Connecting...");
                 sock = new BTThread(MainActivity.bluetoothAdapter, connDevice, ks);
+                in.addObserver(sock);
                 sock.start();
             }
         } else {
             findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
+            in.alarmOn();
             ((TextView) findViewById(R.id.main_text))
                     .setText("Activate");
-            //sock.interrupt();
         }
         isMainButtonRed = !isMainButtonRed;
     }
