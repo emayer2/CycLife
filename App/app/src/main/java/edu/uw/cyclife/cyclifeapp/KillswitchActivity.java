@@ -198,6 +198,7 @@ public class KillswitchActivity extends AppCompatActivity
                 v.clearAnimation();
                 r.stop();
                 vib.cancel();
+                MainActivity.ks.alarmOff();
                 if (!outOfTime) {
                     ks.cancel();
                     findViewById(R.id.kill_button).setBackgroundResource(R.drawable.power_button_green);
@@ -280,6 +281,7 @@ public class KillswitchActivity extends AppCompatActivity
             mGoogleApiClient.disconnect();
         }
         ks.cancel();
+        MainActivity.ks.alarmOff();
         r.stop();
         vib.cancel();
         BluetoothDevice connDevice = null;
@@ -289,15 +291,15 @@ public class KillswitchActivity extends AppCompatActivity
                 break;
             }
         }
-        showToast("Connecting...");
-        MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, connDevice,
-                MainActivity.ks, true);
-        MainActivity.sock.start();
+//        showToast("Connecting...");
+//        MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, connDevice,
+//                MainActivity.ks);
+//        MainActivity.sock.start();
     }
 
-    private void showToast(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-    }
+//    private void showToast(String message) {
+//        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+//    }
 
     /**
      * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.

@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(si);
             } else {
                 showToast("Connecting...");
-                sock = new BTThread(MainActivity.bluetoothAdapter, connDevice, ks, false);
+                sock = new BTThread(MainActivity.bluetoothAdapter, connDevice, ks);
                 sock.start();
             }
         } else {
@@ -374,48 +374,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             // Do nothing since we're in the home already
-        } else if (id == R.id.nav_bluetooth) {  // TODO: Remove this
-//            Intent si = new Intent(this, BluetoothActivity.class);
-//            startActivity(si);
-//            MainActivity.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-//            if (MainActivity.bluetoothAdapter == null) {
-//                // Device does not support Bluetooth
-//                ((TextView)findViewById(R.id.main_text)).setText("No Bluetooth Support :(");
-//            } else {
-//                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-//                        == PackageManager.PERMISSION_GRANTED &&
-//                        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                                == PackageManager.PERMISSION_GRANTED) {
-//                    // Bluetooth found, check if enabled and prompt
-//                    if (!MainActivity.bluetoothAdapter.isEnabled()) {
-//                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//                        startActivityForResult(enableBtIntent, MainActivity.REQUEST_ENABLE_BT);
-//                    }
-//                    // Check if location enabled, and prompt
-//                    if (!MainActivity.bluetoothAdapter.isEnabled()) {
-//                        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//                        startActivityForResult(enableBtIntent, MainActivity.REQUEST_ENABLE_BT);
-//                    }
-//                    if (!((LocationManager) getSystemService(Context.LOCATION_SERVICE))
-//                            .isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-//                        ((TextView)findViewById(R.id.main_text)).setText("Location Not Turned On :(");
-//                    } else {
-//
-//                        // Start discovery, first ask for location permissions
-//                        // (for hosts of android OS >= 6.0)
-//                        if (MainActivity.bluetoothAdapter.isDiscovering()) {
-//                            MainActivity.bluetoothAdapter.cancelDiscovery();
-//                        }
-//                        MainActivity.deviceList.clear();
-//                        MainActivity.foundDevices = new HashSet<>();
-//                        MainActivity.pairedDevices = new HashSet<>();
-//                        MainActivity.bluetoothAdapter.startDiscovery();
-//                    }
-//                } else {
-//                    ((TextView) findViewById(R.id.main_text))
-//                            .setText("Location Permission Not Enabled!");
-//                }
-//            }
+        } else if (id == R.id.nav_bluetooth) {
         } else if (id == R.id.nav_call) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
                     == PackageManager.PERMISSION_GRANTED) {

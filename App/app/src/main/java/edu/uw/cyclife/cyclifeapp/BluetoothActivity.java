@@ -49,7 +49,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 addr = addr.split("Addr: ")[1];
                 BluetoothDevice device = MainActivity.bluetoothAdapter.getRemoteDevice(addr);
                 MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device,
-                        MainActivity.ks, false);
+                        MainActivity.ks);
                 MainActivity.sock.start();
                 finish();
             }
@@ -98,7 +98,7 @@ public class BluetoothActivity extends AppCompatActivity {
                     return;
                 }
                 MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, device,
-                        MainActivity.ks, false);
+                        MainActivity.ks);
                 MainActivity.sock.start();
                 finish();
             }
