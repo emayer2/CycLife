@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static edu.uw.cyclife.cyclifeapp.MainActivity.sock;
+
 
 public class KillswitchActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -51,6 +53,9 @@ public class KillswitchActivity extends AppCompatActivity
     long[] pattern = {0, 100, 1000};
 
     SharedPreferences sharedPref = null;
+
+
+    private CountDownTimer ks;
 
     /**
      * Provides the entry point to Google Play services.
@@ -75,6 +80,7 @@ public class KillswitchActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.kill_switch_timer);
+        //getActionBar().setDisplayHomeAsUpEnabled(false);
 
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.CALL_PHONE}, 1);
@@ -135,7 +141,7 @@ public class KillswitchActivity extends AppCompatActivity
         // Vibrate for 500 milliseconds
         vib.vibrate(pattern, 0);
 
-        final CountDownTimer ks = new CountDownTimer(ksLength * 1000, 1000) { // adjust the milli seconds here
+        ks = new CountDownTimer(ksLength * 1000, 1000) { // adjust the milli seconds here
 
             public void onTick(long millisUntilFinished) {
 
@@ -182,7 +188,8 @@ public class KillswitchActivity extends AppCompatActivity
                 text1.setText("Emergency Message Sent");
                 outOfTime = true;
             }
-        }.start();
+        };
+        ks.start();
 
         killbutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -270,6 +277,9 @@ public class KillswitchActivity extends AppCompatActivity
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
+        ks.cancel();
+        r.stop();
+        vib.cancel();
     }
 
     /**

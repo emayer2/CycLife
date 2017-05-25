@@ -32,6 +32,8 @@ public class BTThread extends Thread {
     private FileOutputStream outputStreamWriter;
     private KSWrapper ksWatcher;
 
+    private boolean alarmSend;
+
     // Alarm packet
     public final byte ALARM = 0b01101111;
 
@@ -39,7 +41,7 @@ public class BTThread extends Thread {
     private boolean isCrash = false;
 
     public BTThread(BluetoothAdapter adapter, BluetoothDevice device,
-                    KSWrapper ks) {
+                    KSWrapper ks, boolean al) {
         BluetoothSocket temp = null;
         try {
             temp = device.createInsecureRfcommSocketToServiceRecord(BT_UUID);
@@ -54,6 +56,7 @@ public class BTThread extends Thread {
         adapter.cancelDiscovery();
         openFile();
         ksWatcher = ks;
+        alarmSend = al;
     }
 
     @Override
@@ -106,6 +109,11 @@ public class BTThread extends Thread {
         }
         boolean connected = false;
         boolean alarm = false;
+
+
+
+
+
         while (!alarm) {
             try {
                 if (!connected) {
@@ -145,6 +153,11 @@ public class BTThread extends Thread {
                 Log.d(TAG, "Input stream was disconnected", e);
                 break;
             }
+        }
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

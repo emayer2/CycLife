@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity
     public static ListView fdeviceListView;
     public static ListView pdeviceListView;
     public static BTThread sock;
+    public static boolean wasCrashed = false;
     private boolean isMainButtonRed = true;
     public static KSWrapper ks;
 
@@ -152,6 +153,12 @@ public class MainActivity extends AppCompatActivity
         KSWrapper k = (KSWrapper) o;
         if (k.getAlarm()) {
             k.alarmOff();
+            wasCrashed = true;
+//            (findViewById(R.id.main_button)).performClick();
+//            findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
+//            ((TextView) findViewById(R.id.main_text))
+//                    .setText("Activate");
+//            isMainButtonRed = true;
             Intent ks = new Intent(this, KillswitchActivity.class);
             startActivityForResult(ks, 1);
         }
@@ -270,7 +277,7 @@ public class MainActivity extends AppCompatActivity
             findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
             ((TextView) findViewById(R.id.main_text))
                     .setText("Activate");
-            //sock.interrupt();
+            sock.interrupt();
         }
         isMainButtonRed = !isMainButtonRed;
     }
@@ -500,6 +507,15 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (wasCrashed) {
+            wasCrashed = false;
+            (findViewById(R.id.main_button)).performClick();
+        }
     }
 
     @Override
