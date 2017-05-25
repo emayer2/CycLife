@@ -1,7 +1,9 @@
 package edu.uw.cyclife.cyclifeapp;
 
 import android.Manifest;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -280,6 +282,21 @@ public class KillswitchActivity extends AppCompatActivity
         ks.cancel();
         r.stop();
         vib.cancel();
+        BluetoothDevice connDevice = null;
+        for (BluetoothDevice b : MainActivity.pairedDevices) {
+            if (b.getName().equals("CycLifeModule")) {
+                connDevice = b;
+                break;
+            }
+        }
+        showToast("Connecting...");
+        MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, connDevice,
+                MainActivity.ks, true);
+        MainActivity.sock.start();
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     /**

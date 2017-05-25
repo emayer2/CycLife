@@ -270,14 +270,14 @@ public class MainActivity extends AppCompatActivity
                 startActivity(si);
             } else {
                 showToast("Connecting...");
-                sock = new BTThread(MainActivity.bluetoothAdapter, connDevice, ks);
+                sock = new BTThread(MainActivity.bluetoothAdapter, connDevice, ks, false);
                 sock.start();
             }
         } else {
             findViewById(R.id.main_button).setBackgroundResource(R.drawable.power_button_red);
             ((TextView) findViewById(R.id.main_text))
                     .setText("Activate");
-            sock.interrupt();
+            //sock.interrupt();
         }
         isMainButtonRed = !isMainButtonRed;
     }

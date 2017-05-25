@@ -111,38 +111,9 @@ public class BTThread extends Thread {
         boolean alarm = false;
 
 
-
-
-
-        while (!alarm) {
+        if (alarmSend) {
             try {
-                if (!connected) {
-                    outStream.write(new byte[]{(byte)0b11001010});
-                    connected = true;
-                } else if (inStream.available() != 0) {  // If we have anything to read
-                    numBytes = inStream.read(inbuf);
-                    for (int i = 0; i < numBytes && !alarm; i++) {
-                        if (inbuf[i] == ALARM) {
-                            ksWatcher.alarmOn();
-                            alarm = true;
-                            break;
-                        }
-                        bytes[byteCount] = inbuf[i];
-                        byteCount++;
-                        if (byteCount == 4) {
-                            data[currData] = ByteBuffer.wrap(bytes)
-                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                            data  = ByteBuffer.wrap(bytes)
-//                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
-                            byteCount = 0;
-//                            writeToFile(data);
-                            if (currData == numData - 1) {
-                                writeToFile(data);
-                            }
-                            currData = (currData + 1) % numData;
-                        }
-                    }
-                }
+                outStream.write(0b10010011);
             } catch (IOException e) {
                 try {
                     outputStreamWriter.close();
@@ -151,13 +122,58 @@ public class BTThread extends Thread {
                     Log.e("Exception", "File close failed: " + ef.toString());
                 }
                 Log.d(TAG, "Input stream was disconnected", e);
-                break;
             }
-        }
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        } else {
+            while (!alarm) {
+                try {
+                    if (!connected) {
+                        outStream.write(new byte[]{(byte) 0b11001010});
+                        connected = true;
+                    } else if (inStream.available() != 0) {  // If we have anything to read
+                        numBytes = inStream.read(inbuf);
+                        for (int i = 0; i < numBytes && !alarm; i++) {
+                            if (inbuf[i] == ALARM) {
+                                ksWatcher.alarmOn();
+                                alarm = true;
+                                break;
+                            }
+                            bytes[byteCount] = inbuf[i];
+                            byteCount++;
+                            if (byteCount == 4) {
+                                data[currData] = ByteBuffer.wrap(bytes)
+                                        .order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                                //                            data  = ByteBuffer.wrap(bytes)
+                                //                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                                byteCount = 0;
+                                //                            writeToFile(data);
+                                if (currData == numData - 1) {
+                                    writeToFile(data);
+                                }
+                                currData = (currData + 1) % numData;
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    try {
+                        outputStreamWriter.close();
+                    } catch (IOException ef) {
+                        Log.e("Exception", "File close failed: " + ef.toString());
+                    }
+                    Log.d(TAG, "Input stream was disconnected", e);
+                    break;
+                }
+            }
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
