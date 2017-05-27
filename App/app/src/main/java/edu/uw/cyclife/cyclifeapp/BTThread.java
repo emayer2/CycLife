@@ -136,15 +136,13 @@ public class BTThread extends Thread implements Observer {
                             done = true;
                             break;
                         }
+                        // The data detection code
 //                        bytes[byteCount] = inbuf[i];
 //                        byteCount++;
 //                        if (byteCount == 4) {
 //                            data[currData] = ByteBuffer.wrap(bytes)
 //                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//                            //                            data  = ByteBuffer.wrap(bytes)
-//                            //                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
 //                            byteCount = 0;
-//                            //                            writeToFile(data);
 //                            if (currData == numData - 1) {
 //                                writeToFile(data);
 //                            }
