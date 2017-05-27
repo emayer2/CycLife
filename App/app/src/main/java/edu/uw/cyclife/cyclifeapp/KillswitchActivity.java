@@ -1,9 +1,7 @@
 package edu.uw.cyclife.cyclifeapp;
 
 import android.Manifest;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,7 +10,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -34,8 +31,6 @@ import com.google.android.gms.location.LocationServices;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static edu.uw.cyclife.cyclifeapp.MainActivity.sock;
 
 
 public class KillswitchActivity extends AppCompatActivity
@@ -75,7 +70,6 @@ public class KillswitchActivity extends AppCompatActivity
     protected TextView mLongitudeText;
     protected String mLat;
     protected String mLong;
-    //protected String emergencyMessage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -203,7 +197,6 @@ public class KillswitchActivity extends AppCompatActivity
                     ks.cancel();
                     findViewById(R.id.kill_button).setBackgroundResource(R.drawable.power_button_green);
                     text1.setText("Emergency Message Cancelled");
-                    //(findViewById(R.id.main_button)).performClick();
                 }
             }
         });
@@ -216,7 +209,6 @@ public class KillswitchActivity extends AppCompatActivity
             if (!contact.equals("") || !contact.equals(" ") || !contact.equals("555-2368")) {
                 contactNumbers.add(contact);
             }
-            //Toast.makeText(this, contact, Toast.LENGTH_LONG).show();
         }
 
         return contactNumbers;
@@ -280,26 +272,7 @@ public class KillswitchActivity extends AppCompatActivity
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-//        ks.cancel();
-//        MainActivity.ks.alarmOff();
-//        r.stop();
-//        vib.cancel();
-//        BluetoothDevice connDevice = null;
-//        for (BluetoothDevice b : MainActivity.pairedDevices) {
-//            if (b.getName().equals("CycLifeModule")) {
-//                connDevice = b;
-//                break;
-//            }
-//        }
-//        showToast("Connecting...");
-//        MainActivity.sock = new BTThread(MainActivity.bluetoothAdapter, connDevice,
-//                MainActivity.ks);
-//        MainActivity.sock.start();
     }
-
-//    private void showToast(String message) {
-//        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-//    }
 
     @Override
     public void onBackPressed() {

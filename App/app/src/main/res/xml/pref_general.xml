@@ -149,10 +149,4 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="Edit Emergency Message" />
-    <EditTextPreference
-        android:defaultValue="Default value"
-        android:key="edit_text_preference_2"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="Device Discovery" />
 </PreferenceScreen>
