@@ -1,6 +1,8 @@
 package edu.uw.cyclife.cyclifeapp;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -76,7 +78,14 @@ public class KillswitchActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.kill_switch_timer);
-        //getActionBar().setDisplayHomeAsUpEnabled(false);
+        // TODO: Push notification for crash detected
+        NotificationManager notif=(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notify=new Notification.Builder
+                (getApplicationContext()).setContentTitle("CycLife").setContentText("Press Kill Switch to stop emergency message").
+                setContentTitle("Crash Detected").setSmallIcon(R.drawable.power_button_orange).build();
+
+        notify.flags |= Notification.FLAG_AUTO_CANCEL;
+        notif.notify(0, notify);
 
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.CALL_PHONE}, 1);

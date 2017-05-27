@@ -29,14 +29,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.data.DataBufferObserver;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -233,15 +231,6 @@ public class MainActivity extends AppCompatActivity
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter);
 
-        // Create an instance of GoogleAPIClient.
-//        if (mGoogleApiClient == null) {
-//            mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                    .addConnectionCallbacks(this)
-//                    .addOnConnectionFailedListener(this)
-//                    .addApi(LocationServices.API)
-//                    .build();
-//        }
-
         // Start observing killswitch watcher
         ks = new KSWrapper();
         in = new KSWrapper();
@@ -376,17 +365,6 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             // Do nothing since we're in the home already
-        } else if (id == R.id.nav_bluetooth) {
-        } else if (id == R.id.nav_call) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
-                    == PackageManager.PERMISSION_GRANTED) {
-                Intent callIntent = new Intent(Intent.ACTION_CALL);
-                callIntent.setData(Uri.parse("tel:1234567890"));
-                startActivity(callIntent);
-            } else {
-                ((TextView) findViewById(R.id.main_text))
-                        .setText("Phone Permission Not Enabled!");
-            }
         } else if (id == R.id.nav_settings) {
             Intent settIntent = new Intent(this, SettingsActivity.class);
             startActivityForResult(settIntent, 1);
