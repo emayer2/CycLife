@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity
         observe(ks);
 
         // Setup battery
-        setBatteryHeight(currHeight);
+        setBatteryHeight(MAX_BAT_HEIGHT);
     }
 
     public void searchConnect(View v) {
