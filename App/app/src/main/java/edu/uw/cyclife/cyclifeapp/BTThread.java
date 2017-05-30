@@ -112,7 +112,7 @@ public class BTThread extends Thread implements Observer {
         int currData = 0;
         int numData = 6;
 
-        float data[] = new float[numData];
+        int data[] = new int[numData];
         byte bytes[] = new byte[4];
         for (int i = 0; i < numData; i++) {
             data[i] = 0;
@@ -141,7 +141,7 @@ public class BTThread extends Thread implements Observer {
 //                        byteCount++;
 //                        if (byteCount == 4) {
 //                            data[currData] = ByteBuffer.wrap(bytes)
-//                                    .order(ByteOrder.LITTLE_ENDIAN).getFloat();
+//                                    .order(ByteOrder.LITTLE_ENDIAN).getInt();
 //                            byteCount = 0;
 //                            if (currData == numData - 1) {
 //                                writeToFile(data);
@@ -195,7 +195,7 @@ public class BTThread extends Thread implements Observer {
         }
     }
 
-    private void writeToFile(float data[]) {
+    private void writeToFile(int data[]) {
         String state = Environment.getExternalStorageState();
         while (!Environment.MEDIA_MOUNTED.equals(state)) {
             // Wait...
